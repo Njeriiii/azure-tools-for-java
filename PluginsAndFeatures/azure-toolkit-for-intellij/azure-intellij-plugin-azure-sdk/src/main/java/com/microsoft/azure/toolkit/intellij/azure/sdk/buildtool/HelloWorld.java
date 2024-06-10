@@ -1,7 +1,5 @@
 package com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool;
 
-// make a class similar to MavenProjectInspection to trigger a hello world statement
-
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.lang.StdLanguages;
@@ -30,9 +28,6 @@ public class HelloWorld extends LocalInspectionTool{
             @Override
             public void visitFile(@NotNull PsiFile file) {
                 if (file.getName().equals("pom.xml")) {
-                    System.out.println("Hello World!!");
-                    holder.registerProblem(file, "Hello World!!");
-
 
                     FileViewProvider viewProvider = file.getViewProvider();
                     XmlFile xmlFile = (XmlFile) viewProvider.getPsi(StdLanguages.XML);
