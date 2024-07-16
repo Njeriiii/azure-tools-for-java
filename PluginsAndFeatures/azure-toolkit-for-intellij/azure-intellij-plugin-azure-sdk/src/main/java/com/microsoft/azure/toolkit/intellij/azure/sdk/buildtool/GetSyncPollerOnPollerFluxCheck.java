@@ -50,6 +50,8 @@ public class GetSyncPollerOnPollerFluxCheck extends LocalInspectionTool {
         private static final RuleConfig ruleConfig;
         private static final String ANTI_PATTERN_MESSAGE;
         private static final String METHOD_TO_CHECK;
+        private static final String RECOMMENDATION_TEXT;
+        private static final String RECOMMENDATION_LINK;
         private static boolean SKIP_WHOLE_RULE;
 
         static {
@@ -61,6 +63,8 @@ public class GetSyncPollerOnPollerFluxCheck extends LocalInspectionTool {
 
             METHOD_TO_CHECK = ruleConfig.getMethodsToCheck().get(0);
             ANTI_PATTERN_MESSAGE = ruleConfig.getAntiPatternMessage();
+            RECOMMENDATION_TEXT = ruleConfig.getRecommendationText();
+            RECOMMENDATION_LINK = ruleConfig.getRecommendationLink();
             SKIP_WHOLE_RULE = ruleConfig == RuleConfig.EMPTY_RULE;
         }
 
@@ -100,7 +104,7 @@ public class GetSyncPollerOnPollerFluxCheck extends LocalInspectionTool {
                 boolean isAsyncContext = checkIfAsyncContext(methodCall);
 
                 if (isAsyncContext && isAzureClient(methodCall)) {
-                    holder.registerProblem(expression, ANTI_PATTERN_MESSAGE);
+                    holder.registerProblem(expression, ANTI_PATTERN_MESSAGE, CustomQuickFix.showRecommendationText(RECOMMENDATION_TEXT, RECOMMENDATION_LINK));
                 }
             }
         }

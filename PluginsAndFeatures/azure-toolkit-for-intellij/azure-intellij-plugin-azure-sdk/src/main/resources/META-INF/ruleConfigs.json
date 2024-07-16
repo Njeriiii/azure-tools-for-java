@@ -5,7 +5,7 @@
       "uploadWithResponse"
     ],
     "anti_pattern_message": "Azure Storage upload API without length parameter detected. Use upload API with length parameter instead.",
-    "recommendation_text": "Use Upload APIs that take a length parameter.",
+    "recommendation_text": "Use Upload APIs that take a length parameter. Otherwise, buffering the entire payload in memory can lead to OutOfMemoryErrors, especially when dealing with large files or high-volume uploads",
     "recommendation_link": "https://learn.microsoft.com/azure/storage/blobs/storage-blob-upload-java"
   },
   "ServiceBusReceiverAsyncClientCheck": {
@@ -22,7 +22,7 @@
       "ServiceBusProcessorClient"
     ],
     "anti_pattern_message": "Auto-complete enabled by default. Use the disableAutoComplete() API call to prevent automatic message completion.",
-    "recommendation_text": "Explicitly Disable Auto-Complete: When creating ServiceBusReceiver or Processor clients,  explicitly use the  disableAutoComplete() method call to prevent automatic message completion.",
+    "recommendation_text": "Explicitly Disable Auto-Complete: When creating ServiceBusReceiver or Processor clients,  explicitly use the  disableAutoComplete() method call to prevent automatic message completion in cases of failure or error.",
     "recommendation_link": "https://learn.microsoft.com/en-us/java/api/com.azure.messaging.servicebus.servicebusclientbuilder.servicebusreceiverclientbuilder?view=azure-java-stable#com-azure-messaging-servicebus-servicebusclientbuilder-servicebusreceiverclientbuilder-disableautocomplete()"
   },
   "DynamicClientCreationCheck": {
@@ -58,6 +58,9 @@
   },
   "GetSyncPollerOnPollerFluxCheck": {
     "methods_to_check": "getSyncPoller",
-    "anti_pattern_message": "Use of getSyncPoller() on a PollerFlux detected. Directly use SyncPoller to handle synchronous polling tasks"
+    "anti_pattern_message": "Use of getSyncPoller() on a PollerFlux detected. Directly use SyncPoller to handle synchronous polling tasks",
+    "recommendation_text": "Instead of using `getSyncPoller()`, it's recommended to use the `SyncPoller` directly to handle synchronous polling tasks. `SyncPoller` provides a synchronous way to interact with the poller and is the preferred method for synchronous operations.",
+    "recommendation_link": "https://learn.microsoft.com/java/api/com.azure.core.util.polling.syncpoller?view=azure-java-stable"
+
   }
 }
