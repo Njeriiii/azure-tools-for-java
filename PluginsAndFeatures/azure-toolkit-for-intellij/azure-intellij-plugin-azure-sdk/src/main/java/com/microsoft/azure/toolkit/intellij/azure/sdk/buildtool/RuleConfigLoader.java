@@ -129,6 +129,8 @@ public class RuleConfigLoader {
         List<String> clientsToCheck = new ArrayList<>();
         List<String> servicesToCheck = new ArrayList<>();
         String antiPatternMessage = null;
+        String recommendationText = null;
+        String recommendationLink = null;
 
         // Check if the JSON file starts with an object
         if (reader.nextToken() != JsonToken.START_OBJECT) {
@@ -154,11 +156,17 @@ public class RuleConfigLoader {
                 case "services_to_check":
                     servicesToCheck = getListFromJsonArray(reader);
                     break;
+                case "recommendation_text":
+                    recommendationText = reader.getString();
+                    break;
+                case "recommendation_link":
+                    recommendationLink = reader.getString();
+                    break;
                 default:
                     reader.skipChildren();
             }
         }
-        return new RuleConfig(methodsToCheck, clientsToCheck, servicesToCheck, antiPatternMessage);
+        return new RuleConfig(methodsToCheck, clientsToCheck, servicesToCheck, antiPatternMessage, recommendationText, recommendationLink);
     }
 
     /**

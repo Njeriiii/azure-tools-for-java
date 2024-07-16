@@ -52,6 +52,8 @@ public class DynamicClientCreationCheck extends LocalInspectionTool {
         private static final RuleConfig ruleConfig;
         private static final String ANTI_PATTERN_MESSAGE;
         private static final List<String> METHODS_TO_CHECK;
+        private static final String RECOMMENDATION_TEXT;
+        private static final String RECOMMENDATION_LINK;
         private static boolean SKIP_WHOLE_RULE;
 
         static {
@@ -63,6 +65,8 @@ public class DynamicClientCreationCheck extends LocalInspectionTool {
 
             METHODS_TO_CHECK = ruleConfig.getMethodsToCheck();
             ANTI_PATTERN_MESSAGE = ruleConfig.getAntiPatternMessage();
+            RECOMMENDATION_TEXT = ruleConfig.getRecommendationText();
+            RECOMMENDATION_LINK = ruleConfig.getRecommendationLink();
             SKIP_WHOLE_RULE = ruleConfig == RuleConfig.EMPTY_RULE || METHODS_TO_CHECK.isEmpty();
         }
 
@@ -134,7 +138,7 @@ public class DynamicClientCreationCheck extends LocalInspectionTool {
 
                 // Check if the right-hand side is a method call expression
                 if (rhs != null && isClientCreationMethod((PsiMethodCallExpression) rhs)) {
-                    holder.registerProblem(rhs, ANTI_PATTERN_MESSAGE);
+                    holder.registerProblem(rhs, ANTI_PATTERN_MESSAGE, CustomQuickFix.showRecommendationText(RECOMMENDATION_TEXT, RECOMMENDATION_LINK));
                 }
             } else if (blockChild instanceof PsiDeclarationStatement) {    // This is a check for the declaration statement
 

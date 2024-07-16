@@ -12,9 +12,12 @@ class RuleConfig {
     private final List<String> clientsToCheck;
     private final List<String> servicesToCheck;
     private final String antiPatternMessage;
+    private final String recommendationText;
+    private final String recommendationLink;
+
     static final String AZURE_PACKAGE_NAME = "com.azure";
 
-    static final RuleConfig EMPTY_RULE = new RuleConfig(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), "");
+    static final RuleConfig EMPTY_RULE = new RuleConfig(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), "", "", "");
 
     /**
      * Constructor for RuleConfig.
@@ -23,12 +26,16 @@ class RuleConfig {
      * @param clientsToCheck     List of clients to check.
      * @param servicesToCheck    List of services to check.
      * @param antiPatternMessage AntiPattern message.
+     * @param recommendationText Recommendation text for the antipattern.
+     * @param recommendationLink Recommendation link for the antipattern.
      */
-    public RuleConfig(List<String> methodsToCheck, List<String> clientsToCheck, List<String> servicesToCheck, String antiPatternMessage) {
+    public RuleConfig(List<String> methodsToCheck, List<String> clientsToCheck, List<String> servicesToCheck, String antiPatternMessage, String recommendationText, String recommendationLink) {
         this.methodsToCheck = methodsToCheck;
         this.clientsToCheck = clientsToCheck;
         this.servicesToCheck = servicesToCheck;
         this.antiPatternMessage = antiPatternMessage;
+        this.recommendationText = recommendationText;
+        this.recommendationLink = recommendationLink;
     }
 
     // Getters
@@ -67,5 +74,23 @@ class RuleConfig {
      */
     public String getAntiPatternMessage() {
         return antiPatternMessage;
+    }
+
+    /**
+     * This method returns the recommendation text
+     *
+     * @return Recommendation text
+     */
+    public String getRecommendationText() {
+        return recommendationText;
+    }
+
+    /**
+     * This method returns the recommendation link
+     *
+     * @return Recommendation link
+     */
+    public String getRecommendationLink() {
+        return recommendationLink;
     }
 }

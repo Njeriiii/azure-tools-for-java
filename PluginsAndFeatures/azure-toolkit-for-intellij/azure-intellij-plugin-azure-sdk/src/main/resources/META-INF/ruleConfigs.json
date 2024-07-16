@@ -4,11 +4,15 @@
       "upload",
       "uploadWithResponse"
     ],
-    "anti_pattern_message": "Azure Storage upload API without length parameter detected. Use upload API with length parameter instead."
+    "anti_pattern_message": "Azure Storage upload API without length parameter detected. Use upload API with length parameter instead.",
+    "recommendation_text": "Use Upload APIs that take a length parameter.",
+    "recommendation_link": "https://learn.microsoft.com/azure/storage/blobs/storage-blob-upload-java"
   },
   "ServiceBusReceiverAsyncClientCheck": {
     "clients_to_check": "ServiceBusReceiverAsyncClient",
-    "anti_pattern_message": "Use of ServiceBusReceiverAsyncClient detected. Use ServiceBusProcessorClient instead."
+    "anti_pattern_message": "Use of ServiceBusReceiverAsyncClient detected. Use ServiceBusProcessorClient instead.",
+    "recommendation_text": "It's recommended to use the `ServiceBusProcessorClient`. The `ServiceBusProcessorClient` is a higher-level abstraction that simplifies message consumption. It's designed for most common use cases and should be the primary choice for consuming messages. This  makes it a more suitable option for most developers and scenarios.",
+    "recommendation_link": "https://github.com/Azure/azure-sdk-for-java/blob/main/sdk/servicebus/azure-messaging-servicebus/README.md#when-to-use-servicebusprocessorclient"
   },
   "DisableAutoCompleteCheck": {
     "methods_to_check": "disableAutoComplete",
@@ -17,14 +21,18 @@
       "ServiceBusReceiverAsyncClient",
       "ServiceBusProcessorClient"
     ],
-    "anti_pattern_message": "Auto-complete enabled by default. Use the disableAutoComplete() API call to prevent automatic message completion."
+    "anti_pattern_message": "Auto-complete enabled by default. Use the disableAutoComplete() API call to prevent automatic message completion.",
+    "recommendation_text": "Explicitly Disable Auto-Complete: When creating ServiceBusReceiver or Processor clients,  explicitly use the  disableAutoComplete() method call to prevent automatic message completion.",
+    "recommendation_link": "https://learn.microsoft.com/en-us/java/api/com.azure.messaging.servicebus.servicebusclientbuilder.servicebusreceiverclientbuilder?view=azure-java-stable#com-azure-messaging-servicebus-servicebusclientbuilder-servicebusreceiverclientbuilder-disableautocomplete()"
   },
   "DynamicClientCreationCheck": {
     "methods_to_check": [
       "buildClient",
       "buildAsyncClient"
     ],
-    "anti_pattern_message": "Dynamic client creation detected. Create a single client instance and reuse it instead."
+    "anti_pattern_message": "Dynamic client creation detected. Create a single client instance and reuse it instead.",
+    "recommendation_text": "Instead of creating a new client instance for each operation, consider reusing existing client instances. It's recommended to create client instances once and reuse them throughout the application's lifecycle. This approach can lead to better performance and efficiency.",
+    "recommendation_link": "https://learn.microsoft.com/en-us/azure/developer/java/sdk/overview#connect-to-and-use-azure-resources-with-client-libraries"
   },
   "HardcodedAPIKeysAndTokensCheck": {
     "services_to_check": [
@@ -39,11 +47,13 @@
       "BasicAuthenticationCredential"
     ],
     "anti_pattern_message": "DefaultAzureCredential is recommended for authentication if the service client supports Token Credential (Entra ID Authentication). If not, then use Azure Key Credential for API key based authentication.",
-    "solution": "DefaultAzureCredential is recommended for authentication if the service client supports Token Credential (Entra ID Authentication). If not, then use Azure Key Credential for API key based authentication."
+    "recommendation_text": "DefaultAzureCredential is recommended for authentication if the service client supports Token Credential (Entra ID Authentication). If not, then use Azure Key Credential for API key based authentication.",
+    "recommendation_link": "https://learn.microsoft.com/en-us/java/api/com.azure.identity.defaultazurecredential?view=azure-java-stable"
   },
   "ConnectionStringCheck": {
     "methods_to_check": "connectionString",
     "anti_pattern_message": "Connection String detected. Use DefaultAzureCredential for Azure service client authentication instead if the service client supports Token Credential (Entra ID Authentication).",
-    "solution": "DefaultAzureCredential is recommended if the service client supports Token Credential (Entra ID Authentication). if not, then use Azure Key Credential / Connection Strings based authentication"
+    "recommendation_text": "DefaultAzureCredential is recommended if the service client supports Token Credential (Entra ID Authentication). if not, then use Azure Key Credential / Connection Strings based authentication",
+    "recommendation_link": "https://learn.microsoft.com/en-us/java/api/com.azure.identity.defaultazurecredential?view=azure-java-stable"
   }
 }

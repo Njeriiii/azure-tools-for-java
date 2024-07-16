@@ -20,6 +20,8 @@ public class ServiceBusReceiverAsyncClientCheck extends LocalInspectionTool {
     private static final String CLIENT_NAME;
     private static final String SUGGESTION;
     private static final boolean SKIP_WHOLE_RULE;
+    private static final String RECOMMENDATION_TEXT;
+    private static final String RECOMMENDATION_LINK;
 
     // Static initializer block to load the client data once
     static {
@@ -31,6 +33,8 @@ public class ServiceBusReceiverAsyncClientCheck extends LocalInspectionTool {
         SKIP_WHOLE_RULE = ruleConfig == RuleConfig.EMPTY_RULE;
         CLIENT_NAME = ruleConfig.getClientsToCheck().get(0);
         SUGGESTION = ruleConfig.getAntiPatternMessage();
+        RECOMMENDATION_TEXT = ruleConfig.getRecommendationText();
+        RECOMMENDATION_LINK = ruleConfig.getRecommendationLink();
     }
 
     /**
@@ -59,7 +63,7 @@ public class ServiceBusReceiverAsyncClientCheck extends LocalInspectionTool {
 
                     // Register a problem if the client used matches the discouraged client
                     if (element.getType().getPresentableText().equals(CLIENT_NAME)) {
-                        holder.registerProblem(element, SUGGESTION);
+                        holder.registerProblem(element, SUGGESTION, CustomQuickFix.showRecommendationText(RECOMMENDATION_TEXT, RECOMMENDATION_LINK));
                     }
                 }
             }

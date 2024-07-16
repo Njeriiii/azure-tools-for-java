@@ -48,6 +48,8 @@ public class DisableAutoCompleteCheck extends LocalInspectionTool {
         private static final String SUGGESTION;
         private static final List<String> CLIENTS_TO_CHECK;
         private static final String METHOD_TO_CHECK;
+        private static final String RECOMMENDATION_TEXT;
+        private static final String RECOMMENDATION_LINK;
         private static boolean SKIP_WHOLE_RULE;
 
         static {
@@ -60,6 +62,8 @@ public class DisableAutoCompleteCheck extends LocalInspectionTool {
             METHOD_TO_CHECK = ruleConfig.getMethodsToCheck().get(0);
             CLIENTS_TO_CHECK = ruleConfig.getClientsToCheck();
             SUGGESTION = ruleConfig.getAntiPatternMessage();
+            RECOMMENDATION_TEXT = ruleConfig.getRecommendationText();
+            RECOMMENDATION_LINK = ruleConfig.getRecommendationLink();
             SKIP_WHOLE_RULE = ruleConfig == RuleConfig.EMPTY_RULE || CLIENTS_TO_CHECK.isEmpty();
         }
 
@@ -133,7 +137,7 @@ public class DisableAutoCompleteCheck extends LocalInspectionTool {
                 // Process the new expression initialization
                 if (!isAutoCompleteDisabled((PsiMethodCallExpression) initializer)) {
                     // Register a problem if the auto-complete feature is not disabled
-                    holder.registerProblem(initializer, SUGGESTION);
+                    holder.registerProblem(initializer, SUGGESTION, CustomQuickFix.showRecommendationText(RECOMMENDATION_TEXT, RECOMMENDATION_LINK));
                 }
             }
         }

@@ -31,7 +31,7 @@ integration, telemetry connectivity, and Azure Toolkit integration.
   to be buffered into memory before uploading.
 - **Issue**: This can lead to OutOfMemoryErrors, especially with large files or high-volume uploads.
 - **Severity: INFO**
-- **Recommendation**: Use APIs that take a length parameter. Please refer to
+- **Recommendation**: Use Upload APIs that take a length parameter. Please refer to
   the [Azure SDK for Java documentation](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blob-upload-java)
   for additional information.
 

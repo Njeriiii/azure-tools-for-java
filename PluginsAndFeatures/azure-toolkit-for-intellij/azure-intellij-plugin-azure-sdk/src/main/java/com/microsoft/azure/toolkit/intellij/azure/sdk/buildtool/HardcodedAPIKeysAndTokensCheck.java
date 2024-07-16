@@ -44,6 +44,8 @@ public class HardcodedAPIKeysAndTokensCheck extends LocalInspectionTool {
         private static final RuleConfig ruleConfig;
         private static final String ANTI_PATTERN_MESSAGE;
         private static final List<String> SERVICES_TO_CHECK;
+        private static final String RECOMMENDATION_TEXT;
+        private static final String RECOMMENDATION_LINK;
         private static boolean SKIP_WHOLE_RULE;
 
         static {
@@ -55,6 +57,8 @@ public class HardcodedAPIKeysAndTokensCheck extends LocalInspectionTool {
 
             SERVICES_TO_CHECK = ruleConfig.getServicesToCheck();
             ANTI_PATTERN_MESSAGE = ruleConfig.getAntiPatternMessage();
+            RECOMMENDATION_TEXT = ruleConfig.getRecommendationText();
+            RECOMMENDATION_LINK = ruleConfig.getRecommendationLink();
             SKIP_WHOLE_RULE = ruleConfig == RuleConfig.EMPTY_RULE || SERVICES_TO_CHECK.isEmpty();
         }
 
@@ -84,7 +88,7 @@ public class HardcodedAPIKeysAndTokensCheck extends LocalInspectionTool {
                 // Check if the class reference is not null, the qualifier name starts with "com.azure" and
                 // the class reference is in the list of clients to check
                 if (newExpression.getClassReference() != null && newExpression.getClassReference().getQualifiedName().startsWith(RuleConfig.AZURE_PACKAGE_NAME) && SERVICES_TO_CHECK.contains(classReference)) {
-                    this.holder.registerProblem(newExpression, ANTI_PATTERN_MESSAGE);
+                    this.holder.registerProblem(newExpression, ANTI_PATTERN_MESSAGE, CustomQuickFix.showRecommendationText(RECOMMENDATION_TEXT, RECOMMENDATION_LINK));
                 }
             }
         }
