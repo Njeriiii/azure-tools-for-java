@@ -50,17 +50,34 @@
     "recommendation_text": "DefaultAzureCredential is recommended for authentication if the service client supports Token Credential (Entra ID Authentication). If not, then use Azure Key Credential for API key based authentication.",
     "recommendation_link": "https://learn.microsoft.com/en-us/java/api/com.azure.identity.defaultazurecredential?view=azure-java-stable"
   },
-  "ConnectionStringCheck": {
-    "methods_to_check": "connectionString",
-    "anti_pattern_message": "Connection String detected. Use DefaultAzureCredential for Azure service client authentication instead if the service client supports Token Credential (Entra ID Authentication).",
-    "recommendation_text": "DefaultAzureCredential is recommended if the service client supports Token Credential (Entra ID Authentication). if not, then use Azure Key Credential / Connection Strings based authentication",
-    "recommendation_link": "https://learn.microsoft.com/en-us/java/api/com.azure.identity.defaultazurecredential?view=azure-java-stable"
-  },
   "GetSyncPollerOnPollerFluxCheck": {
     "methods_to_check": "getSyncPoller",
-    "anti_pattern_message": "Use of getSyncPoller() on a PollerFlux detected. Directly use SyncPoller to handle synchronous polling tasks",
-    "recommendation_text": "Instead of using `getSyncPoller()`, it's recommended to use the `SyncPoller` directly to handle synchronous polling tasks. `SyncPoller` provides a synchronous way to interact with the poller and is the preferred method for synchronous operations.",
-    "recommendation_link": "https://learn.microsoft.com/java/api/com.azure.core.util.polling.syncpoller?view=azure-java-stable"
-
+    "anti_pattern_message": "Use of getSyncPoller() on a PollerFlux detected. Directly use SyncPoller to handle synchronous polling tasks"
+  },
+  "ServiceBusReceiveModeCheck": {
+    "clients_to_check": [
+      "ServiceBusReceiverClient",
+      "ServiceBusReceiverAsyncClient",
+      "ServiceBusProcessorClient"
+    ],
+    "methods_to_check": [
+      "receiveMode",
+      "prefetchCount"
+    ],
+    "anti_pattern_message": "A high prefetch value in PEEK_LOCK detected. We recommend a prefetch value of 0 or 1 for efficient message retrieval."
+  },
+  "DetectDiscouragedAPIUsageCheck": {
+    "ConnectionStringCheck": {
+      "methods_to_check": "connectionString",
+      "anti_pattern_message": "Connection String detected. Use DefaultAzureCredential for Azure service client authentication instead if the service client supports Token Credential (Entra ID Authentication).",
+      "recommendation_text": "DefaultAzureCredential is recommended if the service client supports Token Credential (Entra ID Authentication). if not, then use Azure Key Credential / Connection Strings based authentication",
+      "recommendation_link": "https://learn.microsoft.com/en-us/java/api/com.azure.identity.defaultazurecredential?view=azure-java-stable"
+    },
+    "GetCompletionsInChatApplicationsCheck": {
+      "methods_to_check": "getCompletions",
+      "anti_pattern_message": "getCompletions API detected. Use the getChatCompletions API instead.",
+      "recommendation_text": "Instead of using `getSyncPoller()`, it's recommended to use the `SyncPoller` directly to handle synchronous polling tasks. `SyncPoller` provides a synchronous way to interact with the poller and is the preferred method for synchronous operations.",
+      "recommendation_link": "https://learn.microsoft.com/java/api/com.azure.core.util.polling.syncpoller?view=azure-java-stable"
+    }
   }
 }
