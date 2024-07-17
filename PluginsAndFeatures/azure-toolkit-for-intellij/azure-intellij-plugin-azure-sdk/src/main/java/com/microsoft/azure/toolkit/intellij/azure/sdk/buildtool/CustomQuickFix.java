@@ -103,12 +103,12 @@ public class CustomQuickFix implements LocalQuickFix {
         int fontSize = editorFont.getSize();
 
         // Apply a font stack that's likely to match IntelliJ's appearance
-        styleSheet.addRule("body { font-family: 'JetBrains Mono', 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Monospaced', monospace; font-size: " + fontSize + "pt; margin: 0; padding: 0; color: #FFFFFF; }");
+        styleSheet.addRule("body { font-family: 'sans-serif'; font-size: " + fontSize + "pt; margin: 0; padding: 0; color: #FFFFFF; }");
         styleSheet.addRule("a { color: #8AC3F7; text-decoration: none; }");
         editorPane.setContentType("text/html");
 
         // Combine the recommendation text and the link on the same line
-        String htmlContent = "<html><body style='width: 500px;'>" + recommendationText + " <a href='" + linkUrl + "'>Refer to Azure SDK for Java documentation</a>" + "</body></html>";
+        String htmlContent = "<html><body style='width: 500px; color: #B0B0B0;'>" + recommendationText + " <a href='" + linkUrl + "'>Refer to Azure SDK for Java documentation</a>" + "</body></html>";
 
         // Set the HTML content to the editorPane
         editorPane.setText(htmlContent);
@@ -139,7 +139,7 @@ public class CustomQuickFix implements LocalQuickFix {
                 .createBalloon().show(relativePoint, Balloon.Position.above);
     }
 
-    public static CustomQuickFix showRecommendationText(String recommendationText, String linkUrl) {
+    static CustomQuickFix showRecommendationText(String recommendationText, String linkUrl) {
         return new CustomQuickFix(recommendationText, linkUrl);
     }
 }

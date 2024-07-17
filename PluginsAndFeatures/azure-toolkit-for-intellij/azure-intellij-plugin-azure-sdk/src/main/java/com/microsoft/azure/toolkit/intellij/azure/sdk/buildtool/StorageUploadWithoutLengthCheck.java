@@ -98,9 +98,6 @@ public class StorageUploadWithoutLengthCheck extends LocalInspectionTool {
                     }
                 }
                 if (!hasLengthArg) {
-                    System.out.println("Registering problem");
-                    System.out.println(RECOMMENDATION_TEXT);
-                    System.out.println(RECOMMENDATION_LINK);
                     holder.registerProblem(expression, SUGGESTION, CustomQuickFix.showRecommendationText(RECOMMENDATION_TEXT, RECOMMENDATION_LINK));
                 }
             }
