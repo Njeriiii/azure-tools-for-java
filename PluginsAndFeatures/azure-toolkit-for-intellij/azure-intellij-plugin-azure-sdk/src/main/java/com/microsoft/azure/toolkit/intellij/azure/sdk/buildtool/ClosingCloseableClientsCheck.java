@@ -24,10 +24,15 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
 
         private final ProblemsHolder holder;
 
-        public CloseableClientVisitor(ProblemsHolder holder) {
+        CloseableClientVisitor(ProblemsHolder holder) {
             this.holder = holder;
         }
 
+        /**
+         * Visit a variable declaration statement
+         * Check if it is a Closeable client and if it is properly closed
+         * @param variable
+         */
         @Override
         public void visitVariable(PsiVariable variable) {
             System.out.println("Variable: " + variable);
@@ -61,10 +66,7 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
 
                             if (implementation.equals("Closeable")) {
                                 System.out.println("Closeable");
-                                checkIfClosedInCodeBlock(variable, (PsiCodeBlock) context);
-                            } else if (implementation.equals("Disposable") && isResourceClosedOrDisposedOf((PsiCodeBlock) context, variable, "Disposable")) {
-                                System.out.println("Disposable");
-                                holder.registerProblem(variable.getNameIdentifier(), "Disposable subscription is not properly disposed of");
+                                checkIfDeclaredInTryWith(variable);
                             }
                         }
                     }
@@ -84,19 +86,15 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
                 if (superType.equalsToText("java.lang.AutoCloseable")) {
                     return "Closeable";
                 }
-                if (superType.equalsToText("reactor.core.Disposable")) {
-                    return "Disposable";
-                }
             }
             return null;
         }
 
-        private void checkIfClosedInCodeBlock(PsiVariable variable, PsiCodeBlock codeBlock) {
+        private void checkIfDeclaredInTryWith(PsiVariable variable) {
             boolean closed;
             boolean declaredInTryWithResources = false;
 
-            System.out.println("codeBlock: " + codeBlock);
-
+            // parent of the variable is the declaration statement
             PsiElement parent = variable.getParent().getParent();
             System.out.println("parent: " + parent);
 
@@ -119,9 +117,8 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
             }
 
             // If the variable is not declared in a try-with-resources block, check if it is closed in the code block
-            if (!declaredInTryWithResources) {
-                String resourceType = "Closeable";
-                closed = isResourceClosedOrDisposedOf((PsiCodeBlock) parent, variable, resourceType);
+            if (!declaredInTryWithResources && parent instanceof PsiCodeBlock) {
+                closed = isResourceClosed(variable, (PsiCodeBlock) parent);
             } else {
                 closed = true; // Already handled by try-with-resources
             }
@@ -131,7 +128,7 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
             }
         }
 
-        private boolean isResourceClosedOrDisposedOf(PsiCodeBlock codeBlock, PsiVariable variable, String resourceType) {
+        private boolean isResourceClosed(PsiVariable variable, PsiCodeBlock codeBlock) {
             System.out.println("isClose/DisposeCalledInStatements");
 
             for (PsiStatement statement : codeBlock.getStatements()) {
@@ -141,7 +138,11 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
                     System.out.println("tryStatement: " + tryStatement);
                     PsiCodeBlock finallyBlock = tryStatement.getFinallyBlock();
                     System.out.println("finallyBlock: " + finallyBlock);
-                    if (finallyBlock != null && processCodeBlock(finallyBlock, variable)) {
+                    if (finallyBlock != null && findClosingMethodCall(finallyBlock, variable)) {
+                        System.out.println("Variable is closed");
+                        return true;
+                    }
+                    else if (findClosingMethodCall(codeBlock.getContainingFile(), variable)) {
                         System.out.println("Variable is closed");
                         return true;
                     }
@@ -150,14 +151,14 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
             return false;
         }
 
-        private boolean processCodeBlock(PsiCodeBlock finallyBlock, PsiVariable variable) {
+        private boolean findClosingMethodCall(PsiElement element, PsiVariable variable) {
 
-            if (variable == null || finallyBlock == null) {
+            if (variable == null || element == null) {
                 return false;
             }
 
             // Use PsiTreeUtil to find all the method calls in the code block
-            Collection<PsiMethodCallExpression> methodCalls = PsiTreeUtil.findChildrenOfType(finallyBlock, PsiMethodCallExpression.class);
+            Collection<PsiMethodCallExpression> methodCalls = PsiTreeUtil.findChildrenOfType(element, PsiMethodCallExpression.class);
 
             // Iterate through all the method calls
             for (PsiMethodCallExpression methodCall : methodCalls) {
@@ -166,18 +167,16 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
                 System.out.println("methodExpression: " + methodExpression);
 
                 // Check if the method call is to the close method
-                if ("close".equals(methodExpression.getReferenceName()) && isClosingOrDisposingMethodCallExpression(methodExpression, variable)) {
+                if ("close".equals(methodExpression.getReferenceName()) && isClosingMethodCallExpression(methodExpression, variable)) {
                     System.out.println("Variable is closed");
                     return true;
-                } else if ("dispose".equals(methodExpression.getReferenceName()) && isClosingOrDisposingMethodCallExpression(methodExpression, variable)) {
-                    System.out.println("Variable is disposed of");
-                    return true;   // Check if the method call is to the dispose method
                 }
             }
             return false;
         }
 
-        private boolean isClosingOrDisposingMethodCallExpression(PsiReferenceExpression methodExpression, PsiVariable variable) {
+
+        private boolean isClosingMethodCallExpression(PsiReferenceExpression methodExpression, PsiVariable variable) {
 
             // Get the qualifier expression of the method call
             PsiExpression qualifier = methodExpression.getQualifierExpression();
