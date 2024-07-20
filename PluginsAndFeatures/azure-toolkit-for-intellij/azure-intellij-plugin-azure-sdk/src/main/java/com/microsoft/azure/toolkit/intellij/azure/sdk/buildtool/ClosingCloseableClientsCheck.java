@@ -16,15 +16,15 @@ import java.util.List;
 public class ClosingCloseableClientsCheck extends LocalInspectionTool {
     @Override
     public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
-        return new CloseableClientVisitor(holder);
+        return new CloseableClientVisitor(holder, isOnTheFly);
     }
 
 
-    class CloseableClientVisitor extends JavaElementVisitor {
+    static class CloseableClientVisitor extends JavaElementVisitor {
 
         private final ProblemsHolder holder;
 
-        CloseableClientVisitor(ProblemsHolder holder) {
+        CloseableClientVisitor(ProblemsHolder holder, boolean isOnTheFly) {
             this.holder = holder;
         }
 
@@ -54,18 +54,13 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
                     System.out.println("scope: " + scope);
 
                     if (scope instanceof PsiDeclarationStatement) {
+                        System.out.println("scopePsiDeclarationStatement: " + scope);
                         PsiElement context = scope.getParent();
                         System.out.println("context: " + context);
                         if (context instanceof PsiCodeBlock) {
                             System.out.println("contextPsiCodeBlock: " + context);
 
-                            String implementation = checkImplementation(resolvedClass);
-                            if (implementation == null) {
-                                return;
-                            }
-
-                            if (implementation.equals("Closeable")) {
-                                System.out.println("Closeable");
+                            if (isCloseable(resolvedClass)) {
                                 checkIfDeclaredInTryWith(variable);
                             }
                         }
@@ -79,26 +74,30 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
             return qualifiedName != null && qualifiedName.startsWith("com.azure.");
         }
 
-        private String checkImplementation(PsiClass psiClass) {
+        private boolean isCloseable(PsiClass psiClass) {
             for (PsiClassType superType : psiClass.getSuperTypes()) {
                 System.out.println("SuperType: " + superType);
                 System.out.println("SuperType: " + superType.getCanonicalText());
                 if (superType.equalsToText("java.lang.AutoCloseable")) {
-                    return "Closeable";
+                    System.out.println("We're heree");
+                    return true;
                 }
             }
-            return null;
+            return false;
         }
 
         private void checkIfDeclaredInTryWith(PsiVariable variable) {
             boolean closed;
             boolean declaredInTryWithResources = false;
 
+            System.out.println("variable: " + variable);
+
             // parent of the variable is the declaration statement
             PsiElement parent = variable.getParent().getParent();
-            System.out.println("parent: " + parent);
+            System.out.println("parentinDeclared: " + parent);
 
             if (parent instanceof PsiTryStatement) {
+                System.out.println("parent instanceof PsiTryStatement");
                 PsiTryStatement tryStatement = (PsiTryStatement) parent;
                 System.out.println("tryStatement: " + tryStatement);
 
