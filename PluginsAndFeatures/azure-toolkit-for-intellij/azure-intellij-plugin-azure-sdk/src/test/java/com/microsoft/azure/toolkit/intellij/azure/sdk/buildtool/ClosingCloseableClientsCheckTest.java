@@ -7,7 +7,12 @@ import com.intellij.psi.PsiClassType;
 import com.intellij.psi.PsiCodeBlock;
 import com.intellij.psi.PsiDeclarationStatement;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiExpression;
+import com.intellij.psi.PsiExpressionList;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiIdentifier;
+import com.intellij.psi.PsiMethodCallExpression;
+import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiResourceList;
 import com.intellij.psi.PsiResourceVariable;
 import com.intellij.psi.PsiStatement;
@@ -19,6 +24,7 @@ import com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.ClosingCloseable
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -26,10 +32,15 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 public class ClosingCloseableClientsCheckTest {
@@ -64,7 +75,7 @@ public class ClosingCloseableClientsCheckTest {
 
         String packageName = "com.azure.messaging.servicebus.ServiceBusReceiverClient";
         String closeableType = "java.lang.AutoCloseable";
-        boolean declaredInTryWithResources = true;
+        boolean declaredInTryWithResources = false;
         String resourceIdentifierText = "receiver";
         String variableIdentifierText = "receiver";
         verifyRegisterProblem(packageName, closeableType, declaredInTryWithResources, resourceIdentifierText, variableIdentifierText);
@@ -90,12 +101,7 @@ public class ClosingCloseableClientsCheckTest {
         PsiElement parent = mock(PsiElement.class);
         PsiTryStatement parentTryStatement = mock(PsiTryStatement.class);
 
-        PsiResourceVariable resource = mock(PsiResourceVariable.class);
         PsiResourceList resourceList = mock(PsiResourceList.class);
-        PsiResourceVariable[] resourceVariables = {resource};
-
-        PsiIdentifier resourceIdentifier = mock(PsiIdentifier.class);
-        PsiIdentifier variableIdentifier = mock(PsiIdentifier.class);
         PsiCodeBlock parentCodeBlock = mock(PsiCodeBlock.class);
 
         // isResourceClosed
@@ -105,6 +111,14 @@ public class ClosingCloseableClientsCheckTest {
 
         // findClosingMethodCall
         PsiTreeUtil mockTreeUtil = mock(PsiTreeUtil.class);
+        PsiMethodCallExpression methodCall = mock(PsiMethodCallExpression.class);
+        PsiExpressionList methodsList = mock(PsiExpressionList.class);
+        PsiElement[] methodCallsArray = new PsiElement[]{methodCall};
+//        Collection<PsiMethodCallExpression> methodCalls = Collections.singletonList(methodCall);
+        PsiReferenceExpression methodExpression = mock(PsiReferenceExpression.class);
+
+        // isClosingMethodCallExpression
+        PsiReferenceExpression qualifierExpression = mock(PsiReferenceExpression.class);
 
 
         // visitVariable
@@ -115,15 +129,18 @@ public class ClosingCloseableClientsCheckTest {
         // Mocking the behavior for getParent() dynamically
         when(mockVariable.getParent()).thenAnswer(new Answer<PsiElement>() {
             private boolean firstCall = true;
+            private boolean secondCall = true;
 
             @Override
             public PsiElement answer(InvocationOnMock invocation) {
                 if (firstCall) {
                     firstCall = false;
                     return scope;
-                } else {
-                    return parent;
+                } else if (secondCall) {
+                    secondCall = false;
+                    return resourceList;
                 }
+                return parent;
             }
         });
 
@@ -132,28 +149,35 @@ public class ClosingCloseableClientsCheckTest {
         when(closeableSuperType.equalsToText(closeableType)).thenReturn(true);
 
         // checkIfDeclaredInTryWith
-        when(parent.getParent()).thenReturn(parentTryStatement);
-        when(parentTryStatement.getResourceList()).thenReturn(resourceList);
-        when(resourceList.getChildren()).thenReturn(resourceVariables);
-
-        when(resource.getNameIdentifier()).thenReturn(resourceIdentifier);
-        when(mockVariable.getNameIdentifier()).thenReturn(variableIdentifier);
-
-        when(resourceIdentifier.getText()).thenReturn(resourceIdentifierText);
-        when(variableIdentifier.getText()).thenReturn(variableIdentifierText); // Change this to make them not equal
-
+        if (declaredInTryWithResources) {
+            when(resourceList.getParent()).thenReturn(parentTryStatement);
+        }
+        when(parent.getParent()).thenReturn(parentCodeBlock);
 
         // isResourceClosed
         when(parentCodeBlock.getStatements()).thenReturn(statements);
-        when(statement.getFinallyBlock()).thenReturn(finallyBlock);
+
+        if (true) {
+            when(statement.getFinallyBlock()).thenReturn(finallyBlock);
+        }
+        else {
+            when(parentCodeBlock.getContainingFile()).thenReturn(mock(PsiFile.class));
+        }
 
         // findClosingMethodCall
-//        when(mockTreeUtil.findchildrenOfType(finallyBlock, PsiMethodCallExpression.class)).thenReturn(null);
+        when(PsiTreeUtil.findChildrenOfType(any(), eq(PsiMethodCallExpression.class))).thenReturn(Arrays.asList(methodCall));
+
+        when(methodsList.getChildren()).thenReturn(methodCallsArray);
+        when(methodCall.getMethodExpression()).thenReturn(methodExpression);
+
+        when(methodCall.getMethodExpression()).thenReturn(methodExpression);
+        when(methodExpression.getReferenceName()).thenReturn("close");
 
 
+        // isClosingMethodCallExpression
+        when(methodExpression.getQualifierExpression()).thenReturn(qualifierExpression);
+        when(qualifierExpression.resolve()).thenReturn(mockVariable);
 
         mockVisitor.visitVariable(mockVariable);
-
-
     }
 }

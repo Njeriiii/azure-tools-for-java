@@ -31,6 +31,7 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
         /**
          * Visit a variable declaration statement
          * Check if it is a Closeable client and if it is properly closed
+         *
          * @param variable
          */
         @Override
@@ -52,18 +53,8 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
                     System.out.println("AzureClient: " + resolvedClass);
                     PsiElement scope = variable.getParent();
                     System.out.println("scope: " + scope);
-
-                    if (scope instanceof PsiDeclarationStatement) {
-                        System.out.println("scopePsiDeclarationStatement: " + scope);
-                        PsiElement context = scope.getParent();
-                        System.out.println("context: " + context);
-                        if (context instanceof PsiCodeBlock) {
-                            System.out.println("contextPsiCodeBlock: " + context);
-
-                            if (isCloseable(resolvedClass)) {
-                                checkIfDeclaredInTryWith(variable);
-                            }
-                        }
+                    if (isCloseable(resolvedClass)) {
+                        checkIfDeclaredInTryWith(variable);
                     }
                 }
             }
@@ -90,34 +81,29 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
             boolean closed;
             boolean declaredInTryWithResources = false;
 
-            System.out.println("variable: " + variable);
+            // Get the parent element of the variable
+            PsiElement parent = variable.getParent();
+            System.out.println("parent: " + parent);
 
-            // parent of the variable is the declaration statement
-            PsiElement parent = variable.getParent().getParent();
-            System.out.println("parentinDeclared: " + parent);
+            if (parent instanceof PsiResourceList) {
+                // The PsiResourceList's parent should be a PsiTryStatement
+                PsiElement greatGrandParent = parent.getParent();
+                System.out.println("greatGrandParent: " + greatGrandParent);
 
-            if (parent instanceof PsiTryStatement) {
-                System.out.println("parent instanceof PsiTryStatement");
-                PsiTryStatement tryStatement = (PsiTryStatement) parent;
-                System.out.println("tryStatement: " + tryStatement);
-
-                PsiResourceList resourceList = tryStatement.getResourceList();
-                System.out.println("resourceList: " + resourceList);
-
-                if (resourceList != null) {
-                    for (PsiElement resource : resourceList) {
-                        System.out.println("resource: " + resource);
-                        if (resource instanceof PsiResourceVariable && ((PsiResourceVariable) resource).getNameIdentifier().equals(variable.getNameIdentifier())) {
-                            declaredInTryWithResources = true;
-                            System.out.println("declaredInTryWithResources: " + declaredInTryWithResources);
-                        }
-                    }
+                if (greatGrandParent instanceof PsiTryStatement) {
+                    declaredInTryWithResources = true;
                 }
             }
 
+            // parent of the variable is the declaration statement
+            PsiElement parentBlock = variable.getParent().getParent();
+
+            System.out.println("parent: " + parentBlock);
+            System.out.println("declaredInTryWithResources " + declaredInTryWithResources);
+
             // If the variable is not declared in a try-with-resources block, check if it is closed in the code block
-            if (!declaredInTryWithResources && parent instanceof PsiCodeBlock) {
-                closed = isResourceClosed(variable, (PsiCodeBlock) parent);
+            if (!declaredInTryWithResources && parentBlock instanceof PsiCodeBlock) {
+                closed = isResourceClosed(variable, (PsiCodeBlock) parentBlock);
             } else {
                 closed = true; // Already handled by try-with-resources
             }
@@ -140,8 +126,7 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
                     if (finallyBlock != null && findClosingMethodCall(finallyBlock, variable)) {
                         System.out.println("Variable is closed");
                         return true;
-                    }
-                    else if (findClosingMethodCall(codeBlock.getContainingFile(), variable)) {
+                    } else if (findClosingMethodCall(codeBlock.getContainingFile(), variable)) {
                         System.out.println("Variable is closed");
                         return true;
                     }
@@ -158,6 +143,9 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
 
             // Use PsiTreeUtil to find all the method calls in the code block
             Collection<PsiMethodCallExpression> methodCalls = PsiTreeUtil.findChildrenOfType(element, PsiMethodCallExpression.class);
+
+            System.out.println("methodCalls: " + methodCalls);
+
 
             // Iterate through all the method calls
             for (PsiMethodCallExpression methodCall : methodCalls) {
