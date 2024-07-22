@@ -135,31 +135,37 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
             return false;
         }
 
+
+
         private boolean findClosingMethodCall(PsiElement element, PsiVariable variable) {
 
             if (variable == null || element == null) {
                 return false;
             }
 
-            // Use PsiTreeUtil to find all the method calls in the code block
-            Collection<PsiMethodCallExpression> methodCalls = PsiTreeUtil.findChildrenOfType(element, PsiMethodCallExpression.class);
-
-            System.out.println("methodCalls: " + methodCalls);
+            System.out.println("element: " + element);
+            System.out.println("variable: " + variable);
 
 
-            // Iterate through all the method calls
-            for (PsiMethodCallExpression methodCall : methodCalls) {
+            // Use an anonymous inner class to process method calls
+            final boolean[] variableClosed = {false};
 
-                PsiReferenceExpression methodExpression = methodCall.getMethodExpression();
-                System.out.println("methodExpression: " + methodExpression);
+            element.accept(new JavaElementVisitor() {
+                @Override
+                public void visitMethodCallExpression(PsiMethodCallExpression methodCall) {
+                    super.visitMethodCallExpression(methodCall);
 
-                // Check if the method call is to the close method
-                if ("close".equals(methodExpression.getReferenceName()) && isClosingMethodCallExpression(methodExpression, variable)) {
-                    System.out.println("Variable is closed");
-                    return true;
+                    PsiReferenceExpression methodExpression = methodCall.getMethodExpression();
+                    System.out.println("methodExpression: " + methodExpression);
+
+                    // Check if the method call is to the close method
+                    if ("close".equals(methodExpression.getReferenceName()) && isClosingMethodCallExpression(methodExpression, variable)) {
+                        System.out.println("Variable is closed");
+                        variableClosed[0] = true;
+                    }
                 }
-            }
-            return false;
+            });
+            return variableClosed[0];
         }
 
 

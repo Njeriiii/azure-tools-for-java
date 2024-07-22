@@ -2,6 +2,7 @@ package com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool;
 
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.JavaElementVisitor;
+import com.intellij.psi.JavaRecursiveElementVisitor;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiClassType;
 import com.intellij.psi.PsiCodeBlock;
@@ -39,6 +40,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
@@ -110,11 +112,7 @@ public class ClosingCloseableClientsCheckTest {
         PsiCodeBlock finallyBlock = mock(PsiCodeBlock.class);
 
         // findClosingMethodCall
-        PsiTreeUtil mockTreeUtil = mock(PsiTreeUtil.class);
         PsiMethodCallExpression methodCall = mock(PsiMethodCallExpression.class);
-        PsiExpressionList methodsList = mock(PsiExpressionList.class);
-        PsiElement[] methodCallsArray = new PsiElement[]{methodCall};
-//        Collection<PsiMethodCallExpression> methodCalls = Collections.singletonList(methodCall);
         PsiReferenceExpression methodExpression = mock(PsiReferenceExpression.class);
 
         // isClosingMethodCallExpression
@@ -159,24 +157,48 @@ public class ClosingCloseableClientsCheckTest {
 
         if (true) {
             when(statement.getFinallyBlock()).thenReturn(finallyBlock);
-        }
-        else {
+        } else {
             when(parentCodeBlock.getContainingFile()).thenReturn(mock(PsiFile.class));
         }
 
-        // findClosingMethodCall
-        when(PsiTreeUtil.findChildrenOfType(any(), eq(PsiMethodCallExpression.class))).thenReturn(Arrays.asList(methodCall));
-
-        when(methodsList.getChildren()).thenReturn(methodCallsArray);
-        when(methodCall.getMethodExpression()).thenReturn(methodExpression);
-
+        // findClosing  MethodCall
         when(methodCall.getMethodExpression()).thenReturn(methodExpression);
         when(methodExpression.getReferenceName()).thenReturn("close");
 
+        PsiElement mockElement = mock(PsiElement.class);
 
-        // isClosingMethodCallExpression
-        when(methodExpression.getQualifierExpression()).thenReturn(qualifierExpression);
-        when(qualifierExpression.resolve()).thenReturn(mockVariable);
+        // Create the anonymous inner class for the visitor and simulate its behavior
+        JavaElementVisitor mockMethodCallVisitor = new JavaElementVisitor() {
+            @Override
+            public void visitMethodCallExpression(PsiMethodCallExpression methodCall) {
+                super.visitMethodCallExpression(methodCall);
+                // Simulate the behavior of the method call being a closing method call
+                if (methodCall.equals(methodCall)) {
+                    System.out.println("Simulating close method call");
+                }
+            }
+        };
+
+        // Manually invoke the visitor on the mock element
+        doAnswer(invocation -> {
+            PsiElement element = invocation.getArgument(0);
+            element.accept(mockMethodCallVisitor);
+            return null;
+        }).when(mockElement).accept(any());
+
+
+
+
+//        when(methodsList.getChildren()).thenReturn(methodCallsArray);
+//        when(methodCall.getMethodExpression()).thenReturn(methodExpression);
+//
+//        when(methodCall.getMethodExpression()).thenReturn(methodExpression);
+//        when(methodExpression.getReferenceName()).thenReturn("close");
+//
+//
+//        // isClosingMethodCallExpression
+//        when(methodExpression.getQualifierExpression()).thenReturn(qualifierExpression);
+//        when(qualifierExpression.resolve()).thenReturn(mockVariable);
 
         mockVisitor.visitVariable(mockVariable);
     }
