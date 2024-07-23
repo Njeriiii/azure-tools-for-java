@@ -38,11 +38,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 public class ClosingCloseableClientsCheckTest {
@@ -165,40 +165,21 @@ public class ClosingCloseableClientsCheckTest {
         when(methodCall.getMethodExpression()).thenReturn(methodExpression);
         when(methodExpression.getReferenceName()).thenReturn("close");
 
-        PsiElement mockElement = mock(PsiElement.class);
-
-        // Create the anonymous inner class for the visitor and simulate its behavior
-        JavaElementVisitor mockMethodCallVisitor = new JavaElementVisitor() {
-            @Override
-            public void visitMethodCallExpression(PsiMethodCallExpression methodCall) {
-                super.visitMethodCallExpression(methodCall);
-                // Simulate the behavior of the method call being a closing method call
-                if (methodCall.equals(methodCall)) {
-                    System.out.println("Simulating close method call");
-                }
-            }
-        };
-
-        // Manually invoke the visitor on the mock element
-        doAnswer(invocation -> {
-            PsiElement element = invocation.getArgument(0);
-            element.accept(mockMethodCallVisitor);
-            return null;
-        }).when(mockElement).accept(any());
-
-
-
-
-//        when(methodsList.getChildren()).thenReturn(methodCallsArray);
-//        when(methodCall.getMethodExpression()).thenReturn(methodExpression);
-//
-//        when(methodCall.getMethodExpression()).thenReturn(methodExpression);
-//        when(methodExpression.getReferenceName()).thenReturn("close");
-//
-//
 //        // isClosingMethodCallExpression
 //        when(methodExpression.getQualifierExpression()).thenReturn(qualifierExpression);
 //        when(qualifierExpression.resolve()).thenReturn(mockVariable);
+
+        // Stub the accept method on the mock element to trigger the visitor
+        doAnswer(invocation -> {
+            JavaRecursiveElementVisitor visitor = invocation.getArgument(0);
+            visitor.visitMethodCallExpression(methodCall);
+            return null;
+        }).when(parent).accept(any(JavaRecursiveElementVisitor.class));
+
+        boolean result = CloseableClientVisitor.findClosingMethodCall(parent, mockVariable);
+        assertTrue(result);
+
+        System.out.println("result: " + result);
 
         mockVisitor.visitVariable(mockVariable);
     }

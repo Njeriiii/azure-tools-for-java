@@ -137,7 +137,7 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
 
 
 
-        private boolean findClosingMethodCall(PsiElement element, PsiVariable variable) {
+        static boolean findClosingMethodCall(PsiElement element, PsiVariable variable) {
 
             if (variable == null || element == null) {
                 return false;
@@ -150,13 +150,14 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
             // Use an anonymous inner class to process method calls
             final boolean[] variableClosed = {false};
 
-            element.accept(new JavaElementVisitor() {
+            element.accept(new JavaRecursiveElementVisitor() {
                 @Override
                 public void visitMethodCallExpression(PsiMethodCallExpression methodCall) {
                     super.visitMethodCallExpression(methodCall);
 
                     PsiReferenceExpression methodExpression = methodCall.getMethodExpression();
                     System.out.println("methodExpression: " + methodExpression);
+                    System.out.println("methodExpression.getReferenceName(): " + methodExpression.getReferenceName());
 
                     // Check if the method call is to the close method
                     if ("close".equals(methodExpression.getReferenceName()) && isClosingMethodCallExpression(methodExpression, variable)) {
@@ -169,9 +170,10 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
         }
 
 
-        private boolean isClosingMethodCallExpression(PsiReferenceExpression methodExpression, PsiVariable variable) {
+        private static boolean isClosingMethodCallExpression(PsiReferenceExpression methodExpression, PsiVariable variable) {
 
             // Get the qualifier expression of the method call
+            System.out.println("methodExpression: " + methodExpression);
             PsiExpression qualifier = methodExpression.getQualifierExpression();
             System.out.println("qualifier: " + qualifier);
             System.out.println("((PsiReferenceExpression) qualifier).resolve() : " + ((PsiReferenceExpression) qualifier).resolve());
