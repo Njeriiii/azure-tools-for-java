@@ -2,6 +2,7 @@ package com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool;
 
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
+import com.intellij.openapi.editor.Document;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.DebugUtil;
 import com.intellij.psi.impl.source.tree.java.PsiDeclarationStatementImpl;
@@ -116,7 +117,7 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
         }
 
         private boolean isResourceClosed(PsiVariable variable, PsiCodeBlock codeBlock) {
-            System.out.println("isClose/DisposeCalledInStatements");
+            System.out.println("isClosedInStatements");
 
             for (PsiStatement statement : codeBlock.getStatements()) {
                 System.out.println("statement: " + statement);
@@ -128,11 +129,14 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
                     if (finallyBlock != null && findClosingMethodCall(finallyBlock, variable)) {
                         System.out.println("Variable is closed");
                         return true;
-                    } else if (findClosingMethodCall(codeBlock.getContainingFile(), variable)) {
-                        System.out.println("Variable is closed");
-                        return true;
                     }
                 }
+            }
+
+
+            if (findClosingMethodCall(codeBlock.getContainingFile(), variable)) {
+                System.out.println("Variable is closed");
+                return true;
             }
             return false;
         }
@@ -152,10 +156,14 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
             // Use an anonymous inner class to process method calls
             final boolean[] variableClosed = {false};
 
-            element.accept(new JavaElementVisitor() {
+            element.accept(new JavaRecursiveElementVisitor() {
                 @Override
                 public void visitMethodCallExpression(PsiMethodCallExpression methodCall) {
+
+                    System.out.println("VisitMethodCallExpression");
                     super.visitMethodCallExpression(methodCall);
+
+                    System.out.println("methodCall: " + methodCall);
 
                     PsiReferenceExpression methodExpression = methodCall.getMethodExpression();
                     System.out.println("methodExpression: " + methodExpression);

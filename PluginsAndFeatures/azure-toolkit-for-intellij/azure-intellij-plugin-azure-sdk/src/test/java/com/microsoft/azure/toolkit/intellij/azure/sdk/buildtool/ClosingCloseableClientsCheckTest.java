@@ -65,8 +65,6 @@ public class ClosingCloseableClientsCheckTest {
         String packageName = "com.azure.messaging.servicebus.ServiceBusReceiverClient";
         String closeableType = "java.lang.AutoCloseable";
         boolean declaredInTryWithResources = false;
-        String resourceIdentifierText = "receiver";
-        String variableIdentifierText = "receiver";
         boolean resourceClosedInFinally = false;
         boolean isResourceClosed = false;
         int numOfInvocations = 1;
@@ -125,12 +123,12 @@ public class ClosingCloseableClientsCheckTest {
             public PsiElement answer(InvocationOnMock invocation) {
                 if (firstCall) {
                     firstCall = false;
-                    return scope;
+                    return scope;  // at visitVariable method
                 } else if (secondCall) {
                     secondCall = false;
-                    return resourceList;
+                    return resourceList;  // at checkIfDeclaredInTryWith method
                 }
-                return parent;
+                return parent; // at checkIfDeclaredInTryWith method
             }
         });
 
