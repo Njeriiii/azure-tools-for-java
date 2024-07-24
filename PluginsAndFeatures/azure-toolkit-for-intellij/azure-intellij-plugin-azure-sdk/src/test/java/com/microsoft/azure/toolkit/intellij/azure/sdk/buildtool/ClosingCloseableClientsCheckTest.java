@@ -32,8 +32,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * This class tests the ClosingCloseableClientsCheck class
+ * <p>
+ * If a Closeable client is not closed, a warning is issued.
+ */
 public class ClosingCloseableClientsCheckTest {
-
 
     // Create a mock ProblemsHolder to be used in the test
     @Mock
@@ -56,75 +60,117 @@ public class ClosingCloseableClientsCheckTest {
         mockVariable = mock(PsiVariable.class);
     }
 
+    /**
+     * This test checks if the Closeable client is declared in a try-with-resources block.
+     * If it is, the Closeable client should be closed automatically.
+     * So, no warning should be issued.
+     */
     @Test
     public void testDeclaredInTryWithResources() {
-        // Test the visitDeclarationStatement method of the CloseableClientVisitor class.
-        // This test checks if the Closeable client is properly closed.
-        // If the Closeable client is not properly closed, a problem is registered with the ProblemsHolder.
 
         String packageName = "com.azure.messaging.servicebus.ServiceBusReceiverClient";
-        String closeableType = "java.lang.AutoCloseable";
+        String closeableTypeName = "java.lang.AutoCloseable";
         boolean declaredInTryWithResources = true;
         boolean resourceClosedInFinally = false;
         boolean isResourceClosedElsewhere = false;
         int numOfInvocations = 0;
-        verifyRegisterProblem(packageName, closeableType, declaredInTryWithResources, resourceClosedInFinally, numOfInvocations, isResourceClosedElsewhere);
+        verifyRegisterProblem(packageName, closeableTypeName, declaredInTryWithResources, resourceClosedInFinally, numOfInvocations, isResourceClosedElsewhere);
     }
 
+    /**
+     * This test checks if the Closeable client is closed in a finally block.
+     * If it is, no warning should be issued.
+     */
     @Test
     public void testResourceClosedInFinally() {
-        // Test the visitDeclarationStatement method of the CloseableClientVisitor class.
-        // This test checks if the Closeable client is properly closed.
-        // If the Closeable client is not properly closed, a problem is registered with the ProblemsHolder.
 
         String packageName = "com.azure.messaging.servicebus.ServiceBusReceiverClient";
-        String closeableType = "java.lang.AutoCloseable";
+        String closeableTypeName = "java.lang.AutoCloseable";
         boolean declaredInTryWithResources = false;
         boolean resourceClosedInFinally = true;
         boolean isResourceClosedElsewhere = true;
         int numOfInvocations = 0;
-        verifyRegisterProblem(packageName, closeableType, declaredInTryWithResources, resourceClosedInFinally, numOfInvocations, isResourceClosedElsewhere);
+        verifyRegisterProblem(packageName, closeableTypeName, declaredInTryWithResources, resourceClosedInFinally, numOfInvocations, isResourceClosedElsewhere);
     }
 
+    /**
+     * This test checks if the Closeable client is closed elsewhere in the source code.
+     * If it is, no warning should be issued.
+     */
     @Test
     public void testResourceClosedElsewhere() {
-        // Test the visitDeclarationStatement method of the CloseableClientVisitor class.
-        // This test checks if the Closeable client is properly closed.
-        // If the Closeable client is not properly closed, a problem is registered with the ProblemsHolder.
 
-        String packageName = "com.azure.messaging.servicebus.ServiceBusReceiverClient";
-        String closeableType = "java.lang.AutoCloseable";
+        String packageName = "com.azure.messaging.eventhubs.EventHubConsumerAsyncClient";
+        String closeableTypeName = "java.io.Closeable";
         boolean declaredInTryWithResources = false;
         boolean resourceClosedInFinally = false;
         boolean isResourceClosedElsewhere = true;
         int numOfInvocations = 0;
-        verifyRegisterProblem(packageName, closeableType, declaredInTryWithResources, resourceClosedInFinally, numOfInvocations, isResourceClosedElsewhere);
+        verifyRegisterProblem(packageName, closeableTypeName, declaredInTryWithResources, resourceClosedInFinally, numOfInvocations, isResourceClosedElsewhere);
     }
 
+    /**
+     * This test checks if the Closeable client is not closed at all
+     * If it is not, a warning should be issued.
+     */
     @Test
     public void testResourceNotClosed() {
-        // Test the visitDeclarationStatement method of the CloseableClientVisitor class.
-        // This test checks if the Closeable client is properly closed.
-        // If the Closeable client is not properly closed, a problem is registered with the ProblemsHolder.
 
         String packageName = "com.azure.messaging.servicebus.ServiceBusReceiverClient";
-        String closeableType = "java.lang.AutoCloseable";
+        String closeableTypeName = "java.lang.AutoCloseable";
         boolean declaredInTryWithResources = false;
         boolean resourceClosedInFinally = false;
         boolean isResourceClosedElsewhere = false;
         int numOfInvocations = 1;
-        verifyRegisterProblem(packageName, closeableType, declaredInTryWithResources, resourceClosedInFinally, numOfInvocations, isResourceClosedElsewhere);
+        verifyRegisterProblem(packageName, closeableTypeName, declaredInTryWithResources, resourceClosedInFinally, numOfInvocations, isResourceClosedElsewhere);
     }
 
+    /**
+     * This test checks if the Closeable client is not a Closeable type
+     * If it is not, a warning should not be issued.
+     */
+    @Test
+    public void testNotCloseable() {
 
+        String packageName = "com.azure.messaging.servicebus.ServiceBusReceiverClient";
+        String closeableTypeName = "not.AutoCloseable";
+        boolean declaredInTryWithResources = false;
+        boolean resourceClosedInFinally = false;
+        boolean isResourceClosedElsewhere = false;
+        int numOfInvocations = 0;
+        verifyRegisterProblem(packageName, closeableTypeName, declaredInTryWithResources, resourceClosedInFinally, numOfInvocations, isResourceClosedElsewhere);
+    }
+
+    /**
+     * This test checks if the Closeable client is not an Azure client
+     * If it is not, a warning should not be issued as the rule is only for Azure clients.
+     */
+    @Test
+    public void testNotAzure() {
+
+        String packageName = "com.notazure.messaging.servicebus.ServiceBusReceiverClient";
+        String closeableTypeName = "not.AutoCloseable";
+        boolean declaredInTryWithResources = true;
+        boolean resourceClosedInFinally = false;
+        boolean isResourceClosedElsewhere = false;
+        int numOfInvocations = 0;
+        verifyRegisterProblem(packageName, closeableTypeName, declaredInTryWithResources, resourceClosedInFinally, numOfInvocations, isResourceClosedElsewhere);
+    }
+
+    /**
+     * This method creates a CloseableClientVisitor object for testing the ClosingCloseableClientsCheck class.
+     */
     private CloseableClientVisitor createVisitor() {
-        return new CloseableClientVisitor(mockHolder, false);
+        return new CloseableClientVisitor(mockHolder);
     }
 
-    private void verifyRegisterProblem(String packageName, String closeableType, boolean declaredInTryWithResources, boolean resourceClosedInFinally, int numOfInvocations, boolean isResourceClosedElsewhere) {
-        // Verify that the registerProblem method is called with the correct parameters
+    /**
+     * This method verifies if the registerProblem method is called the expected number of times.
+     * A variety of parameters are passed to this method to test different scenarios.
+     */
+    private void verifyRegisterProblem(String packageName, String closeableTypeName, boolean declaredInTryWithResources, boolean resourceClosedInFinally, int numOfInvocations, boolean isResourceClosedElsewhere) {
 
-        // visitVariable
+        // visitVariable method
         PsiClassType type = mock(PsiClassType.class);
         PsiClass resolvedClass = mock(PsiClass.class);
         PsiDeclarationStatement scope = mock(PsiDeclarationStatement.class);
@@ -132,29 +178,29 @@ public class ClosingCloseableClientsCheckTest {
         PsiClassType closeableSuperType = mock(PsiClassType.class);
         PsiClassType[] superTypesList = {closeableSuperType};
 
-        // checkIfDeclaredInTryWith
+        // checkIfDeclaredInTryWith method
         PsiElement parent = mock(PsiElement.class);
         PsiTryStatement parentTryStatement = mock(PsiTryStatement.class);
 
         PsiResourceList resourceList = mock(PsiResourceList.class);
         PsiCodeBlock parentCodeBlock = mock(PsiCodeBlock.class);
 
-        // isResourceClosedElsewhere
+        // isResourceClosedElsewhere method
         PsiTryStatement statement = mock(PsiTryStatement.class);
         PsiStatement[] statements = {statement};
         PsiCodeBlock finallyBlock = mock(PsiCodeBlock.class);
         PsiFile mockFile = mock(PsiFile.class);
 
-        // findClosingMethodCall
+        // findClosingMethodCall method
         PsiMethodCallExpression methodCall = mock(PsiMethodCallExpression.class);
         PsiReferenceExpression methodExpression = mock(PsiReferenceExpression.class);
 
-        // isClosingMethodCallExpression
+        // isClosingMethodCallExpression method
         PsiReferenceExpression qualifierExpression = mock(PsiReferenceExpression.class);
 
         PsiIdentifier variableIdentifier = mock(PsiIdentifier.class);
 
-        // visitVariable
+        // visitVariable method
         when(mockVariable.getType()).thenReturn(type);
         when(type.resolve()).thenReturn(resolvedClass);
         when(resolvedClass.getQualifiedName()).thenReturn(packageName);
@@ -179,15 +225,15 @@ public class ClosingCloseableClientsCheckTest {
 
         when(scope.getParent()).thenReturn(context);
         when(resolvedClass.getSuperTypes()).thenReturn(superTypesList);
-        when(closeableSuperType.equalsToText(closeableType)).thenReturn(true);
+        when(closeableSuperType.getCanonicalText()).thenReturn(closeableTypeName);
 
-        // checkIfDeclaredInTryWith
+        // checkIfDeclaredInTryWith method
         if (declaredInTryWithResources) {
             when(resourceList.getParent()).thenReturn(parentTryStatement);
         }
         when(parent.getParent()).thenReturn(parentCodeBlock);
 
-        // isResourceClosedElsewhere
+        // isResourceClosedElsewhere method
         when(parentCodeBlock.getStatements()).thenReturn(statements);
 
         if (resourceClosedInFinally) {
@@ -196,20 +242,19 @@ public class ClosingCloseableClientsCheckTest {
             when(parentCodeBlock.getContainingFile()).thenReturn(mockFile);
         }
 
-        // findClosing  MethodCall
+        // findClosingMethodCall method
         when(methodCall.getMethodExpression()).thenReturn(methodExpression);
 
         if (isResourceClosedElsewhere) {
             when(methodExpression.getReferenceName()).thenReturn("close");
-        }
-        else {
+        } else {
             when(methodExpression.getReferenceName()).thenReturn(null);
         }
 
-        // isClosingMethodCallExpression
         when(methodExpression.getQualifierExpression()).thenReturn(qualifierExpression);
         when(qualifierExpression.resolve()).thenReturn(mockVariable);
 
+        // Mock source code for the JavaElementVisitor to identify 'close' method call
         PsiElement sourceCode = resourceClosedInFinally ? finallyBlock : mockFile;
 
         // Stub the accept method on the mock element to trigger the visitor
@@ -219,11 +264,8 @@ public class ClosingCloseableClientsCheckTest {
             return null;
         }).when(sourceCode).accept(any(JavaElementVisitor.class));
 
-
         when(mockVariable.getNameIdentifier()).thenReturn(variableIdentifier);
-
         mockVisitor.visitVariable(mockVariable);
-
-        verify(mockHolder, times(numOfInvocations)).registerProblem(Mockito.eq(variableIdentifier), Mockito.contains("Closeable client is not properly closed"));
+        verify(mockHolder, times(numOfInvocations)).registerProblem(Mockito.eq(variableIdentifier), Mockito.contains("Closeable client that is not closed detected. Close the client after use to release resources."));
     }
 }
