@@ -109,6 +109,8 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
             }
 
             if (!closed) {
+                System.out.println("Variable is not closed");
+                System.out.println("variable.getNameIdentifier(): " + variable.getNameIdentifier());
                 holder.registerProblem(variable.getNameIdentifier(), "Closeable client is not properly closed");
             }
         }
@@ -150,7 +152,7 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
             // Use an anonymous inner class to process method calls
             final boolean[] variableClosed = {false};
 
-            element.accept(new JavaRecursiveElementVisitor() {
+            element.accept(new JavaElementVisitor() {
                 @Override
                 public void visitMethodCallExpression(PsiMethodCallExpression methodCall) {
                     super.visitMethodCallExpression(methodCall);
@@ -160,30 +162,22 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
                     System.out.println("methodExpression.getReferenceName(): " + methodExpression.getReferenceName());
 
                     // Check if the method call is to the close method
-                    if ("close".equals(methodExpression.getReferenceName()) && isClosingMethodCallExpression(methodExpression, variable)) {
-                        System.out.println("Variable is closed");
-                        variableClosed[0] = true;
+                    if ("close".equals(methodExpression.getReferenceName())) {// && isClosingMethodCallExpression(methodExpression, variable)) {
+
+                        PsiExpression qualifier = methodExpression.getQualifierExpression();
+                        System.out.println("qualifier: " + qualifier);
+                        System.out.println("((PsiReferenceExpression) qualifier).resolve() : " + ((PsiReferenceExpression) qualifier).resolve());
+                        // Check if the qualifier is a reference expression and if it resolves to the variable
+                        if (qualifier instanceof PsiReferenceExpression && ((PsiReferenceExpression) qualifier).resolve() == variable) {
+                            System.out.println("Variable is closed");
+                            variableClosed[0] = true;
+                        }
                     }
+
                 }
             });
+            System.out.println("variableClosed[0]: " + variableClosed[0]);
             return variableClosed[0];
-        }
-
-
-        private static boolean isClosingMethodCallExpression(PsiReferenceExpression methodExpression, PsiVariable variable) {
-
-            // Get the qualifier expression of the method call
-            System.out.println("methodExpression: " + methodExpression);
-            PsiExpression qualifier = methodExpression.getQualifierExpression();
-            System.out.println("qualifier: " + qualifier);
-            System.out.println("((PsiReferenceExpression) qualifier).resolve() : " + ((PsiReferenceExpression) qualifier).resolve());
-
-            // Check if the qualifier is a reference expression and if it resolves to the variable
-            if (qualifier instanceof PsiReferenceExpression && ((PsiReferenceExpression) qualifier).resolve() == variable) {
-                System.out.println("Variable is disposed of");
-                return true;
-            }
-            return false;
         }
     }
 }

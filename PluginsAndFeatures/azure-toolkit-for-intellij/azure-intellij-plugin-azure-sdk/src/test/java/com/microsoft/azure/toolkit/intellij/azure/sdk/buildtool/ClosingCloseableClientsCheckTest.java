@@ -2,47 +2,34 @@ package com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool;
 
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.JavaElementVisitor;
-import com.intellij.psi.JavaRecursiveElementVisitor;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiClassType;
 import com.intellij.psi.PsiCodeBlock;
 import com.intellij.psi.PsiDeclarationStatement;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiExpression;
-import com.intellij.psi.PsiExpressionList;
+
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiIdentifier;
 import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiResourceList;
-import com.intellij.psi.PsiResourceVariable;
 import com.intellij.psi.PsiStatement;
 import com.intellij.psi.PsiTryStatement;
-import com.intellij.psi.PsiType;
 import com.intellij.psi.PsiVariable;
-import com.intellij.psi.util.PsiTreeUtil;
 import com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.ClosingCloseableClientsCheck.CloseableClientVisitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
+
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class ClosingCloseableClientsCheckTest {
@@ -80,7 +67,10 @@ public class ClosingCloseableClientsCheckTest {
         boolean declaredInTryWithResources = false;
         String resourceIdentifierText = "receiver";
         String variableIdentifierText = "receiver";
-        verifyRegisterProblem(packageName, closeableType, declaredInTryWithResources, resourceIdentifierText, variableIdentifierText);
+        boolean resourceClosedInFinally = false;
+        boolean isResourceClosed = false;
+        int numOfInvocations = 1;
+        verifyRegisterProblem(packageName, closeableType, declaredInTryWithResources, resourceClosedInFinally, numOfInvocations, isResourceClosed);
     }
 
 
@@ -88,7 +78,7 @@ public class ClosingCloseableClientsCheckTest {
         return new CloseableClientVisitor(mockHolder, false);
     }
 
-    private void verifyRegisterProblem(String packageName, String closeableType, boolean declaredInTryWithResources, String resourceIdentifierText, String variableIdentifierText) {
+    private void verifyRegisterProblem(String packageName, String closeableType, boolean declaredInTryWithResources, boolean resourceClosedInFinally, int numOfInvocations, boolean isResourceClosed) {
         // Verify that the registerProblem method is called with the correct parameters
 
         // visitVariable
@@ -110,6 +100,7 @@ public class ClosingCloseableClientsCheckTest {
         PsiTryStatement statement = mock(PsiTryStatement.class);
         PsiStatement[] statements = {statement};
         PsiCodeBlock finallyBlock = mock(PsiCodeBlock.class);
+        PsiFile mockFile = mock(PsiFile.class);
 
         // findClosingMethodCall
         PsiMethodCallExpression methodCall = mock(PsiMethodCallExpression.class);
@@ -118,6 +109,7 @@ public class ClosingCloseableClientsCheckTest {
         // isClosingMethodCallExpression
         PsiReferenceExpression qualifierExpression = mock(PsiReferenceExpression.class);
 
+        PsiIdentifier variableIdentifier = mock(PsiIdentifier.class);
 
         // visitVariable
         when(mockVariable.getType()).thenReturn(type);
@@ -155,32 +147,40 @@ public class ClosingCloseableClientsCheckTest {
         // isResourceClosed
         when(parentCodeBlock.getStatements()).thenReturn(statements);
 
-        if (true) {
+        if (resourceClosedInFinally) {
             when(statement.getFinallyBlock()).thenReturn(finallyBlock);
         } else {
-            when(parentCodeBlock.getContainingFile()).thenReturn(mock(PsiFile.class));
+            when(parentCodeBlock.getContainingFile()).thenReturn(mockFile);
         }
 
         // findClosing  MethodCall
         when(methodCall.getMethodExpression()).thenReturn(methodExpression);
-        when(methodExpression.getReferenceName()).thenReturn("close");
 
-//        // isClosingMethodCallExpression
-//        when(methodExpression.getQualifierExpression()).thenReturn(qualifierExpression);
-//        when(qualifierExpression.resolve()).thenReturn(mockVariable);
+        if (isResourceClosed) {
+            when(methodExpression.getReferenceName()).thenReturn("close");
+        }
+        else {
+            when(methodExpression.getReferenceName()).thenReturn(null);
+        }
+
+        // isClosingMethodCallExpression
+        when(methodExpression.getQualifierExpression()).thenReturn(qualifierExpression);
+        when(qualifierExpression.resolve()).thenReturn(mockVariable);
+
+        PsiElement sourceCode = resourceClosedInFinally ? finallyBlock : mockFile;
 
         // Stub the accept method on the mock element to trigger the visitor
         doAnswer(invocation -> {
-            JavaRecursiveElementVisitor visitor = invocation.getArgument(0);
+            JavaElementVisitor visitor = invocation.getArgument(0);
             visitor.visitMethodCallExpression(methodCall);
             return null;
-        }).when(parent).accept(any(JavaRecursiveElementVisitor.class));
+        }).when(sourceCode).accept(any(JavaElementVisitor.class));
 
-        boolean result = CloseableClientVisitor.findClosingMethodCall(parent, mockVariable);
-        assertTrue(result);
 
-        System.out.println("result: " + result);
+        when(mockVariable.getNameIdentifier()).thenReturn(variableIdentifier);
 
         mockVisitor.visitVariable(mockVariable);
+
+        verify(mockHolder, times(numOfInvocations)).registerProblem(Mockito.eq(variableIdentifier), Mockito.contains("Closeable client is not properly closed"));
     }
 }
