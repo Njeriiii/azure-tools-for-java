@@ -159,3 +159,91 @@ integration, telemetry connectivity, and Azure Toolkit integration.
     - Please refer to
       the [Azure OpenAI client library for Java](https://learn.microsoft.com/java/api/overview/azure/ai-openai-readme?view=azure-java-preview)
       for additional information.
+
+9. #### Use these encouraged clients instead of their corresponding discouraged clients
+
+    ##### a. Use **`ServiceBusProcessorClient`** instead of **`ServiceBusReceiverAsyncClient`**
+
+    ##### b. Use **`EventProcessorClient`** instead of **`EventHubConsumerAsyncClient`**
+    
+    ##### Anti-pattern:
+    
+    - Both `ServiceBusReceiverAsyncClient` and `EventHubConsumerAsyncClient` are low-level APIs. They provide fine-grained
+      control over message/event handling but require a high level of proficiency in Reactive programming.
+    - Due to their complexity and the need for a deep understanding of Reactive programming, there is a higher risk of these
+      clients being used incorrectly or inefficiently, especially by developers who are not familiar with Reactive
+      paradigms.
+
+    ##### Issue:
+
+    ##### a. **ServiceBusReceiverAsyncClient**
+
+   - **Anti-pattern**: The `ServiceBusReceiverAsyncClient` is considered an anti-pattern because it demands detailed
+   handling of messages, which can be overly complex and unnecessary for most common use cases.
+   - **Severity: WARNING**
+   - **Recommendation**: Instead of using `ServiceBusReceiverAsyncClient`, it is recommended to
+     use `ServiceBusProcessorClient`. The `ServiceBusProcessorClient` is a higher-level abstraction that simplifies
+     message consumption, making it a more suitable option for most developers and scenarios.
+   - Please refer to
+     the [Azure Service Bus client for Java](https://github.com/Azure/azure-sdk-for-java/blob/main/sdk/servicebus/azure-messaging-servicebus/README.md#when-to-use-servicebusprocessorclient)
+     for more information.
+
+    ##### b. **EventHubConsumerAsyncClient**
+    
+    - **Anti-pattern**: The `EventHubConsumerAsyncClient` is considered an anti-pattern due to its low-level nature and the
+    complexity involved in event handling.
+    - **Severity: WARNING**
+    - **Recommendation**: Instead of using `EventHubConsumerAsyncClient`, it is advised to use `EventProcessorClient`.
+    The `EventProcessorClient` provides a higher-level abstraction that simplifies event processing, making it the
+    preferred choice for most developers.
+    - Please refer to
+    the [EventProcessorClient Class](https://learn.microsoft.com/en-us/java/api/com.azure.messaging.eventhubs.eventprocessorclient?view=azure-java-stable)
+    for more information.
+
+10. #### Using Batch Operations Instead of Single Operations in a Loop
+
+- **Anti-pattern**: Calling a single operation in a loop when a batch operation API exists in the SDK that can handle
+  multiple actions in one request.
+- **Issue**:
+    - Repeatedly calling a single operation in a loop leads to multiple network requests, which can be inefficient and
+      slow.
+    - Multiple requests also consume more resources (e.g., network bandwidth, server processing) compared to a single
+      batch request.
+- **Severity: WARNING**
+- **Recommendation**: Use Batch Operations: If the SDK provides a batch operation API, use it to perform multiple
+  actions in a single request.
+
+11. #### EventProcessorClient: Using `updateCheckpointAsync()` API of EventBatchContext object:
+    #### Anti-pattern a. Without `block()` or `block(timeout)`
+    
+    - **Issue**: Calling `updateCheckpointAsync()` without `block()` will not do anything.
+    - **Severity: WARNING**
+    - **Recommendation**: Use `block()` operator with a timeout or consider using the synchronous
+      version `updateCheckpoint()`.
+    
+    #### Anti-pattern b. With `subscribe()`
+    
+    - **Issue**: If you call `subscribe()` with `updateCheckpointAsync()`, you might get the next batch of events before
+      you
+      finish checkpointing the previous batch, or you might have checkpointing of several batches happening out of order
+    - **Severity: WARNING**
+    - **Recommendation**: Instead of `subscribe()`, call `block()` or `block()` with timeout, or use the synchronous
+      version
+      `updateCheckpoint()`.
+
+     Please refer to
+     the [updateCheckpointAsync documentation](https://learn.microsoft.com/en-us/java/api/com.azure.messaging.eventhubs.models.eventbatchcontext?view=azure-java-stable#com-azure-messaging-eventhubs-models-eventbatchcontext-updatecheckpointasync())
+     for additional information.
+
+
+12. #### Kusto Queries Having a Time Interval in the Query String
+
+- **Anti-pattern**: Writing KQL queries with hard-coded time intervals directly in the query string.
+- **Issue**: This approach makes queries less flexible and harder to troubleshoot.
+- **Recommendation**: Consider using the `QueryTimeInterval` parameter in the client method parameters to specify the
+  time interval for the query.
+  By passing the time range as an argument in the method call, you make it easier to troubleshoot and understand the
+  context of an API call.
+  Please refer to
+  the [QueryTimeInterval Class documentation](https://learn.microsoft.com/java/api/com.azure.monitor.query.models.querytimeinterval?view=azure-java-stable)
+  for additional information.
