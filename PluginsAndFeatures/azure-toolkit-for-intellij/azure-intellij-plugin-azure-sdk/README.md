@@ -162,43 +162,46 @@ integration, telemetry connectivity, and Azure Toolkit integration.
 
 9. #### Use these encouraged clients instead of their corresponding discouraged clients
 
-    ##### a. Use **`ServiceBusProcessorClient`** instead of **`ServiceBusReceiverAsyncClient`**
+   ##### a. Use **`ServiceBusProcessorClient`** instead of **`ServiceBusReceiverAsyncClient`**
 
-    ##### b. Use **`EventProcessorClient`** instead of **`EventHubConsumerAsyncClient`**
-    
-    ##### Anti-pattern:
-    
-    - Both `ServiceBusReceiverAsyncClient` and `EventHubConsumerAsyncClient` are low-level APIs. They provide fine-grained
+   ##### b. Use **`EventProcessorClient`** instead of **`EventHubConsumerAsyncClient`**
+
+   ##### Anti-pattern:
+
+    - Both `ServiceBusReceiverAsyncClient` and `EventHubConsumerAsyncClient` are low-level APIs. They provide
+      fine-grained
       control over message/event handling but require a high level of proficiency in Reactive programming.
-    - Due to their complexity and the need for a deep understanding of Reactive programming, there is a higher risk of these
+    - Due to their complexity and the need for a deep understanding of Reactive programming, there is a higher risk of
+      these
       clients being used incorrectly or inefficiently, especially by developers who are not familiar with Reactive
       paradigms.
 
-    ##### Issue:
+   ##### Issue:
 
-    ##### a. **ServiceBusReceiverAsyncClient**
+   ##### a. **ServiceBusReceiverAsyncClient**
 
-   - **Anti-pattern**: The `ServiceBusReceiverAsyncClient` is considered an anti-pattern because it demands detailed
-   handling of messages, which can be overly complex and unnecessary for most common use cases.
-   - **Severity: WARNING**
-   - **Recommendation**: Instead of using `ServiceBusReceiverAsyncClient`, it is recommended to
-     use `ServiceBusProcessorClient`. The `ServiceBusProcessorClient` is a higher-level abstraction that simplifies
-     message consumption, making it a more suitable option for most developers and scenarios.
-   - Please refer to
-     the [Azure Service Bus client for Java](https://github.com/Azure/azure-sdk-for-java/blob/main/sdk/servicebus/azure-messaging-servicebus/README.md#when-to-use-servicebusprocessorclient)
-     for more information.
+    - **Anti-pattern**: The `ServiceBusReceiverAsyncClient` is considered an anti-pattern because it demands detailed
+      handling of messages, which can be overly complex and unnecessary for most common use cases.
+    - **Severity: WARNING**
+    - **Recommendation**: Instead of using `ServiceBusReceiverAsyncClient`, it is recommended to
+      use `ServiceBusProcessorClient`. The `ServiceBusProcessorClient` is a higher-level abstraction that simplifies
+      message consumption, making it a more suitable option for most developers and scenarios.
+    - Please refer to
+      the [Azure Service Bus client for Java](https://github.com/Azure/azure-sdk-for-java/blob/main/sdk/servicebus/azure-messaging-servicebus/README.md#when-to-use-servicebusprocessorclient)
+      for more information.
 
-    ##### b. **EventHubConsumerAsyncClient**
-    
-    - **Anti-pattern**: The `EventHubConsumerAsyncClient` is considered an anti-pattern due to its low-level nature and the
-    complexity involved in event handling.
+   ##### b. **EventHubConsumerAsyncClient**
+
+    - **Anti-pattern**: The `EventHubConsumerAsyncClient` is considered an anti-pattern due to its low-level nature and
+      the
+      complexity involved in event handling.
     - **Severity: WARNING**
     - **Recommendation**: Instead of using `EventHubConsumerAsyncClient`, it is advised to use `EventProcessorClient`.
-    The `EventProcessorClient` provides a higher-level abstraction that simplifies event processing, making it the
-    preferred choice for most developers.
+      The `EventProcessorClient` provides a higher-level abstraction that simplifies event processing, making it the
+      preferred choice for most developers.
     - Please refer to
-    the [EventProcessorClient Class](https://learn.microsoft.com/en-us/java/api/com.azure.messaging.eventhubs.eventprocessorclient?view=azure-java-stable)
-    for more information.
+      the [EventProcessorClient Class](https://learn.microsoft.com/en-us/java/api/com.azure.messaging.eventhubs.eventprocessorclient?view=azure-java-stable)
+      for more information.
 
 10. #### Using Batch Operations Instead of Single Operations in a Loop
 
@@ -215,14 +218,14 @@ integration, telemetry connectivity, and Azure Toolkit integration.
 
 11. #### EventProcessorClient: Using `updateCheckpointAsync()` API of EventBatchContext object:
     #### Anti-pattern a. Without `block()` or `block(timeout)`
-    
+
     - **Issue**: Calling `updateCheckpointAsync()` without `block()` will not do anything.
     - **Severity: WARNING**
     - **Recommendation**: Use `block()` operator with a timeout or consider using the synchronous
       version `updateCheckpoint()`.
-    
+
     #### Anti-pattern b. With `subscribe()`
-    
+
     - **Issue**: If you call `subscribe()` with `updateCheckpointAsync()`, you might get the next batch of events before
       you
       finish checkpointing the previous batch, or you might have checkpointing of several batches happening out of order
@@ -231,9 +234,9 @@ integration, telemetry connectivity, and Azure Toolkit integration.
       version
       `updateCheckpoint()`.
 
-     Please refer to
-     the [updateCheckpointAsync documentation](https://learn.microsoft.com/en-us/java/api/com.azure.messaging.eventhubs.models.eventbatchcontext?view=azure-java-stable#com-azure-messaging-eventhubs-models-eventbatchcontext-updatecheckpointasync())
-     for additional information.
+    Please refer to
+    the [updateCheckpointAsync documentation](https://learn.microsoft.com/en-us/java/api/com.azure.messaging.eventhubs.models.eventbatchcontext?view=azure-java-stable#com-azure-messaging-eventhubs-models-eventbatchcontext-updatecheckpointasync())
+    for additional information.
 
 
 12. #### Kusto Queries Having a Time Interval in the Query String
@@ -247,3 +250,15 @@ integration, telemetry connectivity, and Azure Toolkit integration.
   Please refer to
   the [QueryTimeInterval Class documentation](https://learn.microsoft.com/java/api/com.azure.monitor.query.models.querytimeinterval?view=azure-java-stable)
   for additional information.
+
+13. #### Not Closing Azure Closeable Clients
+
+- **Anti-pattern**: Not closing Azure Closeable clients after use.
+- **Issue**: Not closing Azure Closeable clients can lead to resource leaks and potential performance issues.
+- **Severity: WARNING**
+- **Recommendation**: Always close Azure Closeable clients after use to release resources and prevent memory leaks. You
+  can use 'close' method to close the client or declare the client in a try-with-resources block to automatically close
+  it.
+  Please refer
+  to [Interface AutoCloseable documentation](https://docs.oracle.com/javase/8/docs/api/java/lang/AutoCloseable.html) for
+  additional information.

@@ -157,11 +157,12 @@ class RuleConfigLoader {
                 case "servicesToCheck":
                     servicesToCheck = getListFromJsonArray(reader);
                     break;
-                case "regexPatterns":
-                    listedItemsToCheck = getValuesFromJsonReader(reader);
-                    break;
                 default:
-                    if (fieldName.endsWith("Check")) {
+                    if (fieldName == "typesToCheck") {
+                        listedItemsToCheck = getListFromJsonArray(reader);
+                    } else if (fieldName == "regexPatterns") {
+                        listedItemsToCheck = getValuesFromJsonReader(reader);
+                    } else if (fieldName.endsWith("Check")) {
                         // Move to the next token to process the nested object
                         reader.nextToken();
                         antiPatternMessageMap = getMapFromJsonObject(reader, antiPatternMessageMap);
@@ -183,7 +184,6 @@ class RuleConfigLoader {
      */
     private List<String> getListFromJsonArray(JsonReader reader) throws IOException {
         List<String> list = new ArrayList<>();
-
         // Check if the JSON file starts with an array
         if (reader.nextToken() != JsonToken.START_ARRAY) {
 

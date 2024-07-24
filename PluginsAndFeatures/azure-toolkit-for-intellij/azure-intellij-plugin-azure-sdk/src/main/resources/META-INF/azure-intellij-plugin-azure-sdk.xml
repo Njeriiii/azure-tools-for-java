@@ -207,5 +207,16 @@
                 implementationClass="com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.KustoQueriesWithTimeIntervalInQueryStringCheck">
             <class>com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.KustoQueriesWithTimeIntervalInQueryStringCheck</class>
         </localInspection>
+
+        <localInspection
+                language="JAVA"
+                shortName="ClosingCloseableClientsCheck"
+                displayName="Closing Closeable Clients Check"
+                groupName="Azure SDK Rules"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.ClosingCloseableClientsCheck">
+            <class>com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.ClosingCloseableClientsCheck</class>
+        </localInspection>
     </extensions>
 </idea-plugin>
