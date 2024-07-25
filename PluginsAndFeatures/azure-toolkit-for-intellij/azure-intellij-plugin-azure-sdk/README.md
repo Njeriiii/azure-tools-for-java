@@ -247,3 +247,13 @@ integration, telemetry connectivity, and Azure Toolkit integration.
   Please refer to
   the [QueryTimeInterval Class documentation](https://learn.microsoft.com/java/api/com.azure.monitor.query.models.querytimeinterval?view=azure-java-stable)
   for additional information.
+
+13. #### Calling 'stop' then 'start' APIs on a ServiceBusProcessor Client
+
+- **Anti-pattern**: Calling `stop()` followed by `start()` on a `ServiceBusProcessorClient` instance.
+- **Issue**: Calling `stop()` followed by `start()` on a `ServiceBusProcessorClient` involves significant complexity and
+  may
+  be deprecated in future versions of the SDK.
+- **Severity: WARNING**
+- **Recommendation**: Please close this processor instance and create a new one to restart processing. Refer to
+  the [GitHub issue](https://github.com/Azure/azure-sdk-for-java/issues/34464) for more details
