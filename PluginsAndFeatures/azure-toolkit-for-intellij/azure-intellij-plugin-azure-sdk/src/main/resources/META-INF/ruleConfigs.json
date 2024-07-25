@@ -113,5 +113,14 @@
     },
     "antiPatternMessage": "KQL queries with time intervals in the query string detected.",
     "solution": "Use the QueryTimeInterval parameter in the client method parameters to specify the time interval for the query"
+  },
+  "StopThenStartOnServiceBusProcessorCheck": {
+    "methodsToCheck": [
+      "stop",
+      "start",
+      "close"
+    ],
+    "clientsToCheck": "ServiceBusProcessorClient",
+    "antiPatternMessage": "Starting Processor that was stopped before is not recommended, and this feature may be deprecated in the future. Please close this processor instance and create a new one to restart processing"
   }
 }

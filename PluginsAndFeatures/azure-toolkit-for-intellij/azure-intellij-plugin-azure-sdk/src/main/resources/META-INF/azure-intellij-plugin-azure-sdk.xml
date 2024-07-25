@@ -207,5 +207,16 @@
                 implementationClass="com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.KustoQueriesWithTimeIntervalInQueryStringCheck">
             <class>com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.KustoQueriesWithTimeIntervalInQueryStringCheck</class>
         </localInspection>
+
+        <localInspection
+                language="JAVA"
+                shortName="StopThenStartOnServiceBusProcessorCheck"
+                displayName="Stop Then Start On ServiceBusProcessor Check"
+                groupName="Azure SDK Rules"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.StopThenStartOnServiceBusProcessorCheck">
+            <class>com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.StopThenStartOnServiceBusProcessorCheck</class>
+        </localInspection>
     </extensions>
 </idea-plugin>
