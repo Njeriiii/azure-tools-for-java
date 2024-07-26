@@ -1,11 +1,10 @@
 package com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool;
 
 import com.intellij.codeInspection.ProblemsHolder;
-import com.intellij.psi.JavaElementVisitor;
+import com.intellij.psi.JavaRecursiveElementVisitor;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiClassType;
 import com.intellij.psi.PsiCodeBlock;
-import com.intellij.psi.PsiDeclarationStatement;
 import com.intellij.psi.PsiElement;
 
 import com.intellij.psi.PsiFile;
@@ -173,8 +172,6 @@ public class ClosingCloseableClientsCheckTest {
         // visitVariable method
         PsiClassType type = mock(PsiClassType.class);
         PsiClass resolvedClass = mock(PsiClass.class);
-        PsiDeclarationStatement scope = mock(PsiDeclarationStatement.class);
-        PsiCodeBlock context = mock(PsiCodeBlock.class);
         PsiClassType closeableSuperType = mock(PsiClassType.class);
         PsiClassType[] superTypesList = {closeableSuperType};
 
@@ -208,22 +205,17 @@ public class ClosingCloseableClientsCheckTest {
         // Mocking the behavior for getParent() dynamically
         when(mockVariable.getParent()).thenAnswer(new Answer<PsiElement>() {
             private boolean firstCall = true;
-            private boolean secondCall = true;
 
             @Override
             public PsiElement answer(InvocationOnMock invocation) {
                 if (firstCall) {
                     firstCall = false;
-                    return scope;  // at visitVariable method
-                } else if (secondCall) {
-                    secondCall = false;
                     return resourceList;  // at checkIfDeclaredInTryWith method
                 }
                 return parent; // at checkIfDeclaredInTryWith method
             }
         });
 
-        when(scope.getParent()).thenReturn(context);
         when(resolvedClass.getSuperTypes()).thenReturn(superTypesList);
         when(closeableSuperType.getCanonicalText()).thenReturn(closeableTypeName);
 
@@ -259,10 +251,10 @@ public class ClosingCloseableClientsCheckTest {
 
         // Stub the accept method on the mock element to trigger the visitor
         doAnswer(invocation -> {
-            JavaElementVisitor visitor = invocation.getArgument(0);
+            JavaRecursiveElementVisitor visitor = invocation.getArgument(0);
             visitor.visitMethodCallExpression(methodCall);
             return null;
-        }).when(sourceCode).accept(any(JavaElementVisitor.class));
+        }).when(sourceCode).accept(any(JavaRecursiveElementVisitor.class));
 
         when(mockVariable.getNameIdentifier()).thenReturn(variableIdentifier);
         mockVisitor.visitVariable(mockVariable);

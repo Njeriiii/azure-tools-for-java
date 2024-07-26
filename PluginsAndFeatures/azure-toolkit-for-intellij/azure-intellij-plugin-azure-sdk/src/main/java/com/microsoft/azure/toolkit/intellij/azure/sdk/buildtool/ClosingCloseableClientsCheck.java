@@ -3,6 +3,7 @@ package com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.JavaElementVisitor;
+import com.intellij.psi.JavaRecursiveElementVisitor;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiClassType;
 import com.intellij.psi.PsiCodeBlock;
@@ -79,7 +80,6 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
 
                 // Check if the class is an Azure client implementing or extending Closeable
                 if (resolvedClass != null && isAzureClient(resolvedClass)) {
-                    PsiElement scope = variable.getParent();
 
                     // Check if its a closeable client
                     if (isCloseable(resolvedClass)) {
@@ -197,7 +197,7 @@ public class ClosingCloseableClientsCheck extends LocalInspectionTool {
             final boolean variableClosed[] = {false};
 
             // Visit the method call expressions in the element
-            element.accept(new JavaElementVisitor() {
+            element.accept(new JavaRecursiveElementVisitor() {
                 @Override
                 public void visitMethodCallExpression(PsiMethodCallExpression methodCall) {
                     super.visitMethodCallExpression(methodCall);
