@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -199,6 +200,6 @@ public class DisableAutoCompleteCheckTest {
         }
 
         mockVisitor.visitDeclarationStatement(mockDeclarationStatement);
-        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(initializer), contains("Auto-complete enabled by default. Use the disableAutoComplete() API call to prevent automatic message completion."));
+        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(initializer), contains("Auto-complete enabled by default. Use the disableAutoComplete() API call to prevent automatic message completion."), any(CustomQuickFix.class));
     }
 }

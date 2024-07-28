@@ -1,41 +1,35 @@
 {
   "StorageUploadWithoutLengthCheck": {
-    "methods_to_check": [
+    "methodsToCheck": [
       "upload",
       "uploadWithResponse"
     ],
-    "anti_pattern_message": "Azure Storage upload API without length parameter detected. Use upload API with length parameter instead.",
-    "recommendation_text": "Use Upload APIs that take a length parameter. Otherwise, buffering the entire payload in memory can lead to OutOfMemoryErrors, especially when dealing with large files or high-volume uploads",
-    "recommendation_link": "https://learn.microsoft.com/azure/storage/blobs/storage-blob-upload-java"
-  },
-  "ServiceBusReceiverAsyncClientCheck": {
-    "clients_to_check": "ServiceBusReceiverAsyncClient",
-    "anti_pattern_message": "Use of ServiceBusReceiverAsyncClient detected. Use ServiceBusProcessorClient instead.",
-    "recommendation_text": "It's recommended to use the `ServiceBusProcessorClient`. The `ServiceBusProcessorClient` is a higher-level abstraction that simplifies message consumption. It's designed for most common use cases and should be the primary choice for consuming messages. This  makes it a more suitable option for most developers and scenarios.",
-    "recommendation_link": "https://github.com/Azure/azure-sdk-for-java/blob/main/sdk/servicebus/azure-messaging-servicebus/README.md#when-to-use-servicebusprocessorclient"
+    "antiPatternMessage": "Azure Storage upload API without length parameter detected. Use upload API with length parameter instead.",
+    "recommendationText": "Use Upload APIs that take a length parameter. Otherwise, buffering the entire payload in memory can lead to OutOfMemoryErrors, especially when dealing with large files or high-volume uploads",
+    "recommendationLink": "https://learn.microsoft.com/azure/storage/blobs/storage-blob-upload-java"
   },
   "DisableAutoCompleteCheck": {
-    "methods_to_check": "disableAutoComplete",
-    "clients_to_check": [
+    "methodsToCheck": "disableAutoComplete",
+    "clientsToCheck": [
       "ServiceBusReceiverClient",
       "ServiceBusReceiverAsyncClient",
       "ServiceBusProcessorClient"
     ],
-    "anti_pattern_message": "Auto-complete enabled by default. Use the disableAutoComplete() API call to prevent automatic message completion.",
-    "recommendation_text": "Explicitly Disable Auto-Complete: When creating ServiceBusReceiver or Processor clients,  explicitly use the  disableAutoComplete() method call to prevent automatic message completion in cases of failure or error.",
-    "recommendation_link": "https://learn.microsoft.com/en-us/java/api/com.azure.messaging.servicebus.servicebusclientbuilder.servicebusreceiverclientbuilder?view=azure-java-stable#com-azure-messaging-servicebus-servicebusclientbuilder-servicebusreceiverclientbuilder-disableautocomplete()"
+    "antiPatternMessage": "Auto-complete enabled by default. Use the disableAutoComplete() API call to prevent automatic message completion.",
+    "recommendationText": "Explicitly Disable Auto-Complete: When creating ServiceBusReceiver or Processor clients,  explicitly use the  disableAutoComplete() method call to prevent automatic message completion in cases of failure or error.",
+    "recommendationLink": "https://learn.microsoft.com/java/api/com.azure.messaging.servicebus.servicebusclientbuilder.servicebusreceiverclientbuilder?view=azure-java-stable#com-azure-messaging-servicebus-servicebusclientbuilder-servicebusreceiverclientbuilder-disableautocomplete()"
   },
   "DynamicClientCreationCheck": {
-    "methods_to_check": [
+    "methodsToCheck": [
       "buildClient",
       "buildAsyncClient"
     ],
-    "anti_pattern_message": "Dynamic client creation detected. Create a single client instance and reuse it instead.",
-    "recommendation_text": "Instead of creating a new client instance for each operation, consider reusing existing client instances. It's recommended to create client instances once and reuse them throughout the application's lifecycle. This approach can lead to better performance and efficiency.",
-    "recommendation_link": "https://learn.microsoft.com/en-us/azure/developer/java/sdk/overview#connect-to-and-use-azure-resources-with-client-libraries"
+    "antiPatternMessage": "Dynamic client creation detected. Create a single client instance and reuse it instead.",
+    "recommendationText": "Instead of creating a new client instance for each operation, consider reusing existing client instances. It's recommended to create client instances once and reuse them throughout the application's lifecycle. This approach can lead to better performance and efficiency.",
+    "recommendationLink": "https://learn.microsoft.com/azure/developer/java/sdk/overview#connect-to-and-use-azure-resources-with-client-libraries"
   },
   "HardcodedAPIKeysAndTokensCheck": {
-    "services_to_check": [
+    "servicesToCheck": [
       "AzureKeyCredential",
       "AccessToken",
       "KeyCredential",
@@ -46,38 +40,109 @@
       "UsernamePasswordCredentialBuilder",
       "BasicAuthenticationCredential"
     ],
-    "anti_pattern_message": "DefaultAzureCredential is recommended for authentication if the service client supports Token Credential (Entra ID Authentication). If not, then use Azure Key Credential for API key based authentication.",
-    "recommendation_text": "DefaultAzureCredential is recommended for authentication if the service client supports Token Credential (Entra ID Authentication). If not, then use Azure Key Credential for API key based authentication.",
-    "recommendation_link": "https://learn.microsoft.com/en-us/java/api/com.azure.identity.defaultazurecredential?view=azure-java-stable"
+    "antiPatternMessage": "DefaultAzureCredential is recommended for authentication if the service client supports Token Credential (Entra ID Authentication). If not, then use Azure Key Credential for API key based authentication.",
+    "recommendationText": "DefaultAzureCredential is recommended for authentication if the service client supports Token Credential (Entra ID Authentication). If not, then use Azure Key Credential for API key based authentication.",
+    "recommendationLink": "https://learn.microsoft.com/java/api/com.azure.identity.defaultazurecredential?view=azure-java-stable"
   },
   "GetSyncPollerOnPollerFluxCheck": {
-    "methods_to_check": "getSyncPoller",
-    "anti_pattern_message": "Use of getSyncPoller() on a PollerFlux detected. Directly use SyncPoller to handle synchronous polling tasks"
+    "methodsToCheck": "getSyncPoller",
+    "antiPatternMessage": "Use of getSyncPoller() on a PollerFlux detected. Directly use SyncPoller to handle synchronous polling tasks",
+    "recommendationText": "Use of getSyncPoller() on a PollerFlux introduces additional complexity by converting an asynchronous polling mechanism to a synchronous one, which should be avoided. It's recommended to use the SyncPoller directly to handle synchronous polling tasks. ",
+    "recommendationLink": "https://learn.microsoft.com/java/api/com.azure.core.util.polling.syncpoller?view=azure-java-stable"
   },
   "ServiceBusReceiveModeCheck": {
-    "clients_to_check": [
+    "clientsToCheck": [
       "ServiceBusReceiverClient",
       "ServiceBusReceiverAsyncClient",
       "ServiceBusProcessorClient"
     ],
-    "methods_to_check": [
+    "methodsToCheck": [
       "receiveMode",
       "prefetchCount"
     ],
-    "anti_pattern_message": "A high prefetch value in PEEK_LOCK detected. We recommend a prefetch value of 0 or 1 for efficient message retrieval."
+    "antiPatternMessage": "A high prefetch value in PEEK_LOCK detected. We recommend a prefetch value of 0 or 1 for efficient message retrieval.",
+    "recommendationText": ": Setting the receive mode as PEEK_LOCK with a high prefetch value  can result in suboptimal performance, message lock expiry and potential data loss which may require additional handling to recover these messages",
+    "recommendationLink": "https://learn.microsoft.com/azure/service-bus-messaging/service-bus-prefetch?tabs=dotnet#why-is-prefetch-not-the-default-option"
   },
   "DetectDiscouragedAPIUsageCheck": {
     "ConnectionStringCheck": {
-      "methods_to_check": "connectionString",
-      "anti_pattern_message": "Connection String detected. Use DefaultAzureCredential for Azure service client authentication instead if the service client supports Token Credential (Entra ID Authentication).",
-      "recommendation_text": "DefaultAzureCredential is recommended if the service client supports Token Credential (Entra ID Authentication). if not, then use Azure Key Credential / Connection Strings based authentication",
-      "recommendation_link": "https://learn.microsoft.com/en-us/java/api/com.azure.identity.defaultazurecredential?view=azure-java-stable"
+      "methodsToCheck": "connectionString",
+      "antiPatternMessage": "Connection String detected. Use DefaultAzureCredential for Azure service client authentication instead if the service client supports Token Credential (Entra ID Authentication).",
+      "recommendationText": "DefaultAzureCredential is recommended if the service client supports Token Credential (Entra ID Authentication). if not, then use Azure Key Credential / Connection Strings based authentication",
+      "recommendationLink": "https://learn.microsoft.com/java/api/com.azure.identity.defaultazurecredential?view=azure-java-stable"
     },
     "GetCompletionsInChatApplicationsCheck": {
-      "methods_to_check": "getCompletions",
-      "anti_pattern_message": "getCompletions API detected. Use the getChatCompletions API instead.",
-      "recommendation_text": "Instead of using `getSyncPoller()`, it's recommended to use the `SyncPoller` directly to handle synchronous polling tasks. `SyncPoller` provides a synchronous way to interact with the poller and is the preferred method for synchronous operations.",
-      "recommendation_link": "https://learn.microsoft.com/java/api/com.azure.core.util.polling.syncpoller?view=azure-java-stable"
+      "methodsToCheck": "getCompletions",
+      "antiPatternMessage": "getCompletions API detected. Use the getChatCompletions API instead.",
+      "recommendationText": "Use getChatCompletions for Chat Applications: Specifically use getChatCompletions API when generating responses for chatbot or conversational AI applications. The getCompletions API is designed for general-purpose completion tasks. whereas getChatCompletions is specifically optimized for conversational contexts.",
+      "recommendationLink": "https://learn.microsoft.com/java/api/overview/azure/ai-openai-readme?view=azure-java-preview"
     }
+  },
+  "DetectDiscouragedClientCheck": {
+    "ServiceBusReceiverAsyncClientCheck": {
+      "clientsToCheck": "ServiceBusReceiverAsyncClient",
+      "antiPatternMessage": "Use of ServiceBusReceiverAsyncClient detected. Use ServiceBusProcessorClient instead.",
+      "recommendationText": "Instead of using ServiceBusReceiverAsyncClient, it is recommended to use ServiceBusProcessorClient. The ServiceBusProcessorClient is a higher-level abstraction that simplifies message consumption, making it a more suitable option for most developers and scenarios.",
+      "recommendationLink": "https://github.com/Azure/azure-sdk-for-java/blob/main/sdk/servicebus/azure-messaging-servicebus/README.md#when-to-use-servicebusprocessorclient"
+    },
+    "EventHubConsumerAsyncClientCheck": {
+      "clientsToCheck": "EventHubConsumerAsyncClient",
+      "antiPatternMessage": "Use of EventHubConsumerAsyncClient detected. Use EventProcessorClient instead which provides a higher-level abstraction that simplifies event processing, making it the preferred choice for most developers.",
+      "recommendationText": "Instead of using EventHubConsumerAsyncClient, it is advised to use EventProcessorClient. The EventProcessorClient provides a higher-level abstraction that simplifies event processing, making it the preferred choice for most developers",
+      "recommendationLink": "https://learn.microsoft.com/java/api/com.azure.messaging.eventhubs.eventprocessorclient?view=azure-java-stable"
+    }
+  },
+  "SingleOperationInLoopCheck": {
+    "methodsToCheck": [
+      "detectLanguageBatch",
+      "recognizeEntitiesBatch",
+      "recognizePiiEntitiesBatch",
+      "recognizeLinkedEntitiesBatch",
+      "extractKeyPhrasesBatch",
+      "analyzeSentimentBatch"
+    ],
+    "antiPatternMessage": "Single operation found in loop. This SDK provides a batch operation API, use it to perform multiple actions in a single request: ",
+    "recommendationText": "A a batch operation API exists in the SDK that can handle multiple actions in one request.",
+    "recommendationLink": ""
+  },
+  "AbstractUpdateCheckpointAsyncChecker": {
+    "methodsToCheck": "updateCheckpointAsync"
+  },
+  "UpdateCheckpointAsyncSubscribeChecker": {
+    "methodsToCheck": "subscribe",
+    "antiPatternMessage": "Instead of `subscribe()`, call `block()` or `block()` with timeout, or use the synchronous version `updateCheckpoint()`",
+    "recommendationText": "If you call subscribe() with updateCheckpointAsync(), you might get the next batch of events before you finish checkpointing the previous batch, or you might have checkpointing of several batches happening out of order. To avoid this, use block() or block() with a timeout, or consider using the synchronous version updateCheckpoint().",
+    "recommendationLink": "https://learn.microsoft.com/java/api/com.azure.messaging.eventhubs.models.eventbatchcontext?view=azure-java-stable#com-azure-messaging-eventhubs-models-eventbatchcontext-updatecheckpointasync()"
+  },
+  "UpdateCheckpointAsyncBlockChecker": {
+    "methodsToCheck": [
+      "block",
+      "block_with_timeout"
+    ],
+    "antiPatternMessage": "Calling updateCheckpointAsync() without block() will not do anything, use `block()` or `block` operator with a timeout, or consider using the synchronous version `updateCheckpoint().",
+    "recommendationText": "Calling updateCheckpointAsync() without block() will not do anything, use `block()` or `block` operator with a timeout, or consider using the synchronous version `updateCheckpoint().",
+    "recommendationLink": "https://learn.microsoft.com/java/api/com.azure.messaging.eventhubs.models.eventbatchcontext?view=azure-java-stable#com-azure-messaging-eventhubs-models-eventbatchcontext-updatecheckpointasync()"
+  },
+  "KustoQueriesWithTimeIntervalInQueryStringCheck": {
+    "regexPatterns": {
+      "KQL_ANTI_PATTERN_AGO": ".*ago\\(",
+      "KQL_ANTI_PATTERN_DATETIME": ".*datetime\\s*\\(",
+      "KQL_ANTI_PATTERN_NOW": ".*now\\(",
+      "KQL_ANTI_PATTERN_START_OF_PERIOD": ".*startofday\\(\\)|.*startofmonth\\(\\)|.*startofyear\\(\\)",
+      "KQL_ANTI_PATTERN_BETWEEN": ".*between\\(datetime\\("
+    },
+    "antiPatternMessage": "KQL queries with time intervals in the query string detected.",
+    "recommendationText": "Consider using the QueryTimeInterval parameter in the client method parameters to specify the time interval for the query. By passing the time range as an argument in the method call, you make it easier to troubleshoot and understand the context of an API call",
+    "recommendationLink": "https://learn.microsoft.com/java/api/com.azure.monitor.query.models.querytimeinterval?view=azure-java-stable"
+  },
+  "EndpointOnNonAzureOpenAIAuthCheck": {
+    "methodsToCheck": [
+      "endpoint",
+      "credential"
+    ],
+    "servicesToCheck": "KeyCredential",
+    "antiPatternMessage": "Endpoint should not be used with KeyCredential for non-Azure OpenAI clients",
+    "recommendationText": "Omit Endpoint: Only specify the endpoint parameter if you are working with Azure OpenAI services that require it. Otherwise, it is not necessary to authenticate non-Azure Open-AI clients.",
+    "recommendationLink": "https://learn.microsoft.com/java/api/com.azure.core.credential.keycredential?view=azure-java-stable"
   }
 }

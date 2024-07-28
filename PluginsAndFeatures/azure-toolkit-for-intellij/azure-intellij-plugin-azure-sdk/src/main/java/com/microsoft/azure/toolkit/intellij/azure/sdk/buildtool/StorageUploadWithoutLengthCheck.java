@@ -1,11 +1,8 @@
 package com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool;
 
 import com.intellij.codeInspection.LocalInspectionTool;
-//import com.intellij.codeInspection.LocalQuickFix;
-import com.intellij.codeInspection.LocalQuickFix;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.JavaRecursiveElementWalkingVisitor;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiExpressionList;
@@ -32,11 +29,8 @@ public class StorageUploadWithoutLengthCheck extends LocalInspectionTool {
         return "Ensure Storage APIs use Length Parameter";
     }
 
-    private static final List<String> METHODS_TO_CHECK_LIST;
+    private static final RuleConfig RULE_CONFIG;
     private static final String LENGTH_TYPE = "long";
-    private static final String SUGGESTION;
-    private static final String RECOMMENDATION_TEXT;
-    private static final String RECOMMENDATION_LINK;
     private static final boolean SKIP_WHOLE_RULE;
 
 
@@ -45,12 +39,8 @@ public class StorageUploadWithoutLengthCheck extends LocalInspectionTool {
         RuleConfigLoader centralRuleConfigLoader = RuleConfigLoader.getInstance();
 
         // Get the RuleConfig object for the rule
-        final RuleConfig ruleConfig = centralRuleConfigLoader.getRuleConfig(ruleName);
-        METHODS_TO_CHECK_LIST = ruleConfig.getMethodsToCheck();
-        SUGGESTION = ruleConfig.getAntiPatternMessage();
-        RECOMMENDATION_TEXT = ruleConfig.getRecommendationText();
-        RECOMMENDATION_LINK = ruleConfig.getRecommendationLink();
-        SKIP_WHOLE_RULE = ruleConfig == RuleConfig.EMPTY_RULE || METHODS_TO_CHECK_LIST.isEmpty();
+        RULE_CONFIG = centralRuleConfigLoader.getRuleConfig(ruleName);
+        SKIP_WHOLE_RULE = RULE_CONFIG == RuleConfig.EMPTY_RULE || RULE_CONFIG.getMethodsToCheck().isEmpty();
     }
 
     /**
@@ -70,7 +60,7 @@ public class StorageUploadWithoutLengthCheck extends LocalInspectionTool {
                 super.visitMethodCallExpression(expression);
                 String methodName = expression.getMethodExpression().getReferenceName();
 
-                if (!METHODS_TO_CHECK_LIST.contains(methodName)) {
+                if (!RULE_CONFIG.getMethodsToCheck().contains(methodName)) {
                     return;
                 }
 
@@ -98,7 +88,7 @@ public class StorageUploadWithoutLengthCheck extends LocalInspectionTool {
                     }
                 }
                 if (!hasLengthArg) {
-                    holder.registerProblem(expression, SUGGESTION, CustomQuickFix.showRecommendationText(RECOMMENDATION_TEXT, RECOMMENDATION_LINK));
+                    holder.registerProblem(expression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomQuickFix.showRecommendationText(RULE_CONFIG.getRecommendationText(), RULE_CONFIG.getRecommendationLink()));
                 }
             }
         };

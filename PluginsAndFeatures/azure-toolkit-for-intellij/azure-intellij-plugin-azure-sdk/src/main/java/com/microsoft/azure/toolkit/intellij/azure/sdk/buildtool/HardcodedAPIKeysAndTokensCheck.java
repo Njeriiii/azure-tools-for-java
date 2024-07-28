@@ -41,25 +41,16 @@ public class HardcodedAPIKeysAndTokensCheck extends LocalInspectionTool {
         private final ProblemsHolder holder;
 
         // // Define constants for string literals
-        private static final RuleConfig ruleConfig;
-        private static final String ANTI_PATTERN_MESSAGE;
-        private static final List<String> SERVICES_TO_CHECK;
-        private static final String RECOMMENDATION_TEXT;
-        private static final String RECOMMENDATION_LINK;
-        private static boolean SKIP_WHOLE_RULE;
+        private static final RuleConfig RULE_CONFIG;
+        private static final boolean SKIP_WHOLE_RULE;
 
         static {
             final String ruleName = "HardcodedAPIKeysAndTokensCheck";
             RuleConfigLoader centralRuleConfigLoader = RuleConfigLoader.getInstance();
 
             // Get the RuleConfig object for the rule
-            ruleConfig = centralRuleConfigLoader.getRuleConfig(ruleName);
-
-            SERVICES_TO_CHECK = ruleConfig.getServicesToCheck();
-            ANTI_PATTERN_MESSAGE = ruleConfig.getAntiPatternMessage();
-            RECOMMENDATION_TEXT = ruleConfig.getRecommendationText();
-            RECOMMENDATION_LINK = ruleConfig.getRecommendationLink();
-            SKIP_WHOLE_RULE = ruleConfig == RuleConfig.EMPTY_RULE || SERVICES_TO_CHECK.isEmpty();
+            RULE_CONFIG = centralRuleConfigLoader.getRuleConfig(ruleName);
+            SKIP_WHOLE_RULE = RULE_CONFIG == RuleConfig.EMPTY_RULE || RULE_CONFIG.getServicesToCheck().isEmpty();
         }
 
 
@@ -87,8 +78,8 @@ public class HardcodedAPIKeysAndTokensCheck extends LocalInspectionTool {
 
                 // Check if the class reference is not null, the qualifier name starts with "com.azure" and
                 // the class reference is in the list of clients to check
-                if (newExpression.getClassReference() != null && newExpression.getClassReference().getQualifiedName().startsWith(RuleConfig.AZURE_PACKAGE_NAME) && SERVICES_TO_CHECK.contains(classReference)) {
-                    this.holder.registerProblem(newExpression, ANTI_PATTERN_MESSAGE, CustomQuickFix.showRecommendationText(RECOMMENDATION_TEXT, RECOMMENDATION_LINK));
+                if (newExpression.getClassReference() != null && newExpression.getClassReference().getQualifiedName().startsWith(RuleConfig.AZURE_PACKAGE_NAME) && RULE_CONFIG.getServicesToCheck().contains(classReference)) {
+                    this.holder.registerProblem(newExpression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomQuickFix.showRecommendationText(RULE_CONFIG.getRecommendationText(), RULE_CONFIG.getRecommendationLink()));
                 }
             }
         }

@@ -18,6 +18,7 @@ import org.mockito.Mock;
 
 import com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.ServiceBusReceiveModeCheck.ServiceBusReceiveModeVisitor;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -238,6 +239,6 @@ public class ServiceBusReceiveModeCheckTest {
         }
 
         mockVisitor.visitDeclarationStatement(mockDeclarationStatement);
-        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(prefetchCountMethod), contains("A high prefetch value in PEEK_LOCK detected. We recommend a prefetch value of 0 or 1 for efficient message retrieval."));
+        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(prefetchCountMethod), contains("A high prefetch value in PEEK_LOCK detected. We recommend a prefetch value of 0 or 1 for efficient message retrieval."), any(CustomQuickFix.class));
     }
 }

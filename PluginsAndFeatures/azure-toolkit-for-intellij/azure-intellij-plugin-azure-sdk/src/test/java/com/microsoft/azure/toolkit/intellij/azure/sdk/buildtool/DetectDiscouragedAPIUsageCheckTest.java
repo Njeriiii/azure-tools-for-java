@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -56,11 +57,10 @@ public class DetectDiscouragedAPIUsageCheckTest {
      * It also verifies that a warning is raised when a discouraged API is detected.
      */
     @ParameterizedTest
-    @CsvSource({"connectionString, Connection String detected. Use DefaultAzureCredential for Azure service client authentication instead if the service client supports Token Credential (Entra ID Authentication)", "getCompletions, getCompletions API detected. Use the getChatCompletions API instead."})
-    public void testDetectDiscouragedAPIUsageCheck(String methodToCheck, String suggestionMessage) {
+    @CsvSource({"connectionString, com.azure, Connection String detected. Use DefaultAzureCredential for Azure service client authentication instead if the service client supports Token Credential (Entra ID Authentication)", "getCompletions, com.azure.ai.openai, getCompletions API detected. Use the getChatCompletions API instead."})
+    public void testDetectDiscouragedAPIUsageCheck(String methodToCheck, String packageName, String suggestionMessage) {
 
         int numOfInvocations = 1;
-        String packageName = "com.azure";
 
         verifyRegisterProblem(mockVisitor, methodToCheck, numOfInvocations, packageName, suggestionMessage);
     }
@@ -143,6 +143,6 @@ public class DetectDiscouragedAPIUsageCheckTest {
         (visitor).visitElement(methodCallExpression);
 
         // Verify problem is registered
-        verify(mockHolder, times(numOfInvocations)).registerProblem(Mockito.eq(problemElement), Mockito.contains(suggestionMessage));
+        verify(mockHolder, times(numOfInvocations)).registerProblem(Mockito.eq(problemElement), Mockito.contains(suggestionMessage), any(CustomQuickFix.class));
     }
 }

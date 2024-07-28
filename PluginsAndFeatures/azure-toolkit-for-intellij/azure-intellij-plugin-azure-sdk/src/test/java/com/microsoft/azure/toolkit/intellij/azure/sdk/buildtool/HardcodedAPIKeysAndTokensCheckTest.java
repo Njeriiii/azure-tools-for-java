@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -104,6 +105,6 @@ public class HardcodedAPIKeysAndTokensCheckTest {
         mockVisitor.visitElement(newExpression);
 
         // Verify registerProblem is called
-        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(newExpression), Mockito.contains("DefaultAzureCredential is recommended for authentication if the service client supports Token Credential (Entra ID Authentication). " + "If not, then use Azure Key Credential for API key based authentication."));
+        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(newExpression), Mockito.contains("DefaultAzureCredential is recommended for authentication if the service client supports Token Credential (Entra ID Authentication). " + "If not, then use Azure Key Credential for API key based authentication."), any(CustomQuickFix.class));
     }
 }

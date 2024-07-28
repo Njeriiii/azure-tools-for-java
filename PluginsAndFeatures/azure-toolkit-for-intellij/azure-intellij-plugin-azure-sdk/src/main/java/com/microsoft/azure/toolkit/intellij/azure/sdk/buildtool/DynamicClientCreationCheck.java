@@ -17,8 +17,6 @@ import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiStatement;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 /**
  * This class is used to check for the dynamic creation of clients in the code.
  * It extends the LocalInspectionTool class, which is used to create custom code inspections.
@@ -49,11 +47,7 @@ public class DynamicClientCreationCheck extends LocalInspectionTool {
         private final ProblemsHolder holder;
 
         // Define constants for string literals
-        private static final RuleConfig ruleConfig;
-        private static final String ANTI_PATTERN_MESSAGE;
-        private static final List<String> METHODS_TO_CHECK;
-        private static final String RECOMMENDATION_TEXT;
-        private static final String RECOMMENDATION_LINK;
+        private static final RuleConfig RULE_CONFIG;
         private static boolean SKIP_WHOLE_RULE;
 
         static {
@@ -61,13 +55,8 @@ public class DynamicClientCreationCheck extends LocalInspectionTool {
             RuleConfigLoader centralRuleConfigLoader = RuleConfigLoader.getInstance();
 
             // Get the RuleConfig object for the rule
-            ruleConfig = centralRuleConfigLoader.getRuleConfig(ruleName);
-
-            METHODS_TO_CHECK = ruleConfig.getMethodsToCheck();
-            ANTI_PATTERN_MESSAGE = ruleConfig.getAntiPatternMessage();
-            RECOMMENDATION_TEXT = ruleConfig.getRecommendationText();
-            RECOMMENDATION_LINK = ruleConfig.getRecommendationLink();
-            SKIP_WHOLE_RULE = ruleConfig == RuleConfig.EMPTY_RULE || METHODS_TO_CHECK.isEmpty();
+            RULE_CONFIG = centralRuleConfigLoader.getRuleConfig(ruleName);
+            SKIP_WHOLE_RULE = RULE_CONFIG == RuleConfig.EMPTY_RULE || RULE_CONFIG.getMethodsToCheck().isEmpty();
         }
 
         /**
@@ -138,7 +127,7 @@ public class DynamicClientCreationCheck extends LocalInspectionTool {
 
                 // Check if the right-hand side is a method call expression
                 if (rhs != null && isClientCreationMethod((PsiMethodCallExpression) rhs)) {
-                    holder.registerProblem(rhs, ANTI_PATTERN_MESSAGE, CustomQuickFix.showRecommendationText(RECOMMENDATION_TEXT, RECOMMENDATION_LINK));
+                    holder.registerProblem(rhs, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomQuickFix.showRecommendationText(RULE_CONFIG.getRecommendationText(), RULE_CONFIG.getRecommendationLink()));
                 }
             } else if (blockChild instanceof PsiDeclarationStatement) {    // This is a check for the declaration statement
 
@@ -163,7 +152,7 @@ public class DynamicClientCreationCheck extends LocalInspectionTool {
                     // Check if the initializer is a method call expression
                     PsiMethodCallExpression methodCallExpression = (PsiMethodCallExpression) initializer;
                     if (isClientCreationMethod(methodCallExpression)) {
-                        holder.registerProblem(methodCallExpression, ANTI_PATTERN_MESSAGE);
+                        holder.registerProblem(methodCallExpression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomQuickFix.showRecommendationText(RULE_CONFIG.getRecommendationText(), RULE_CONFIG.getRecommendationLink()));
                     }
                 }
             }
@@ -187,7 +176,7 @@ public class DynamicClientCreationCheck extends LocalInspectionTool {
             String methodName = methodExpression.getReferenceName();
 
             // Check if the method name is buildClient or AsyncBuildClient
-            if (methodName != null && METHODS_TO_CHECK.contains(methodName)) {
+            if (methodName != null && RULE_CONFIG.getMethodsToCheck().contains(methodName)) {
 
                 // Extract the qualifier expression
                 PsiExpression qualifierExpression = methodExpression.getQualifierExpression();

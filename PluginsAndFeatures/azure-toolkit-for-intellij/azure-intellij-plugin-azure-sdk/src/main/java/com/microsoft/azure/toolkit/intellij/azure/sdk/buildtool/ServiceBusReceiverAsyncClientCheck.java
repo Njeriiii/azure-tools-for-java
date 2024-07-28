@@ -17,24 +17,17 @@ import org.jetbrains.annotations.NotNull;
 public class ServiceBusReceiverAsyncClientCheck extends LocalInspectionTool {
 
     // Define constants for string literals
-    private static final String CLIENT_NAME;
-    private static final String SUGGESTION;
+    private static final RuleConfig RULE_CONFIG;
     private static final boolean SKIP_WHOLE_RULE;
-    private static final String RECOMMENDATION_TEXT;
-    private static final String RECOMMENDATION_LINK;
 
     // Static initializer block to load the client data once
     static {
         final String ruleName = "ServiceBusReceiverAsyncClientCheck";
 
         RuleConfigLoader centralRuleConfigLoader = RuleConfigLoader.getInstance();
-        final RuleConfig ruleConfig = centralRuleConfigLoader.getRuleConfig(ruleName);
+        RULE_CONFIG = centralRuleConfigLoader.getRuleConfig(ruleName);
 
-        SKIP_WHOLE_RULE = ruleConfig == RuleConfig.EMPTY_RULE;
-        CLIENT_NAME = ruleConfig.getClientsToCheck().get(0);
-        SUGGESTION = ruleConfig.getAntiPatternMessage();
-        RECOMMENDATION_TEXT = ruleConfig.getRecommendationText();
-        RECOMMENDATION_LINK = ruleConfig.getRecommendationLink();
+        SKIP_WHOLE_RULE = RULE_CONFIG.skipRuleCheck() || RULE_CONFIG.getAntiPatternMessageMap().isEmpty();
     }
 
     /**
@@ -62,8 +55,8 @@ public class ServiceBusReceiverAsyncClientCheck extends LocalInspectionTool {
                 if (element instanceof PsiTypeElement && element.getType() != null) {
 
                     // Register a problem if the client used matches the discouraged client
-                    if (element.getType().getPresentableText().equals(CLIENT_NAME)) {
-                        holder.registerProblem(element, SUGGESTION, CustomQuickFix.showRecommendationText(RECOMMENDATION_TEXT, RECOMMENDATION_LINK));
+                    if (element.getType().getPresentableText().equals(RULE_CONFIG.getClientsToCheck().get(0))) {
+                        holder.registerProblem(element, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomQuickFix.showRecommendationText(RULE_CONFIG.getRecommendationText(), RULE_CONFIG.getRecommendationLink()));
                     }
                 }
             }

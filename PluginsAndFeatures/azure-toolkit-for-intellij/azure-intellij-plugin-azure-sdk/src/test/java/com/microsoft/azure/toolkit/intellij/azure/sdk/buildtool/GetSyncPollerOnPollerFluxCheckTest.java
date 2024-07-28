@@ -14,6 +14,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -152,6 +155,9 @@ public class GetSyncPollerOnPollerFluxCheckTest {
         // Act
         mockVisitor.visitMethodCallExpression(mockElement);
 
-        verify(mockHolder, times(numberOfInvocations)).registerProblem(Mockito.eq(mockElement), Mockito.contains("Use of getSyncPoller() on a PollerFlux detected. Directly use SyncPoller to handle synchronous polling tasks"));
+        verify(mockHolder, times(numberOfInvocations)).registerProblem(Mockito.
+                eq(mockElement),
+                Mockito.contains("Use of getSyncPoller() on a PollerFlux detected. Directly use SyncPoller to handle synchronous polling tasks"),
+                any(CustomQuickFix.class));
     }
 }
