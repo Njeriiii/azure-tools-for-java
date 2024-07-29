@@ -50,39 +50,12 @@ public class StopThenStartOnServiceBusProcessorCheckTest {
         String startMethod = "start";
         boolean isStartMethod = true;
 
-        String closeMethod = "close";
-        boolean isCloseMethod = false;
-
         String packageName = "com.azure.messaging.servicebus.ServiceBusProcessorClient";
         int numOfInvocations = 1;
 
         boolean sameVariable = true;
 
-        verifyRegisterProblem(stopMethod, isStopMethod, startMethod, isStartMethod, packageName, closeMethod, isCloseMethod, numOfInvocations, sameVariable);
-    }
-
-    /**
-     * If a stop method is called on a ServiceBusProcessorClient object, followed by a close method call on the same object
-     * Calling a start method on the same object afterward should not register a problem with the ProblemsHolder
-     */
-    @Test
-    public void testStopThenCloseThenStart() {
-
-        String stopMethod = "stop";
-        boolean isStopMethod = true;
-
-        String startMethod = "start";
-        boolean isStartMethod = true;
-
-        String closeMethod = "close";
-        boolean isCloseMethod = true;
-
-        String packageName = "com.azure.messaging.servicebus.ServiceBusProcessorClient";
-        int numOfInvocations = 0;
-
-        boolean sameVariable = true;
-
-        verifyRegisterProblem(stopMethod, isStopMethod, startMethod, isStartMethod, packageName, closeMethod, isCloseMethod, numOfInvocations, sameVariable);
+        verifyRegisterProblem(stopMethod, isStopMethod, startMethod, isStartMethod, packageName, numOfInvocations, sameVariable);
     }
 
     /**
@@ -98,15 +71,12 @@ public class StopThenStartOnServiceBusProcessorCheckTest {
         String startMethod = "start";
         boolean isStartMethod = true;
 
-        String closeMethod = "close";
-        boolean isCloseMethod = false;
-
         String packageName = "com.azure.messaging.servicebus.ServiceBusProcessorClient";
         int numOfInvocations = 0;
 
         boolean sameVariable = false;
 
-        verifyRegisterProblem(stopMethod, isStopMethod, startMethod, isStartMethod, packageName, closeMethod, isCloseMethod, numOfInvocations, sameVariable);
+        verifyRegisterProblem(stopMethod, isStopMethod, startMethod, isStartMethod, packageName, numOfInvocations, sameVariable);
     }
 
     /**
@@ -122,15 +92,12 @@ public class StopThenStartOnServiceBusProcessorCheckTest {
         String startMethod = "start";
         boolean isStartMethod = true;
 
-        String closeMethod = "close";
-        boolean isCloseMethod = false;
-
         String packageName = "com.azure.messaging.servicebus.ServiceBusReceiverAsyncClient";
         int numOfInvocations = 0;
 
         boolean sameVariable = true;
 
-        verifyRegisterProblem(stopMethod, isStopMethod, startMethod, isStartMethod, packageName, closeMethod, isCloseMethod, numOfInvocations, sameVariable);
+        verifyRegisterProblem(stopMethod, isStopMethod, startMethod, isStartMethod, packageName, numOfInvocations, sameVariable);
     }
 
 
@@ -151,12 +118,10 @@ public class StopThenStartOnServiceBusProcessorCheckTest {
      * @param startMethod      the start method to be called
      * @param isStartMethod    a boolean indicating if the start method is called
      * @param packageName      the package name of the variable
-     * @param closeMethod      the close method to be called
-     * @param isCloseMethod    a boolean indicating if the close method is called
      * @param numOfInvocations the number of times the problem should be registered
      * @param sameVariable     a boolean indicating if the start method is called on the same variable
      */
-    private void verifyRegisterProblem(String stopMethod, boolean isStopMethod, String startMethod, boolean isStartMethod, String packageName, String closeMethod, boolean isCloseMethod, int numOfInvocations, boolean sameVariable) {
+    private void verifyRegisterProblem(String stopMethod, boolean isStopMethod, String startMethod, boolean isStartMethod, String packageName, int numOfInvocations, boolean sameVariable) {
 
         PsiMethodCallExpression stopMethodCallExpression = mock(PsiMethodCallExpression.class);
         PsiReferenceExpression stopMethodExpression = mock(PsiReferenceExpression.class);
@@ -165,9 +130,6 @@ public class StopThenStartOnServiceBusProcessorCheckTest {
 
         PsiMethodCallExpression startMethodCallExpression = mock(PsiMethodCallExpression.class);
         PsiReferenceExpression startMethodExpression = mock(PsiReferenceExpression.class);
-
-        PsiMethodCallExpression closeMethodCallExpression = mock(PsiMethodCallExpression.class);
-        PsiReferenceExpression closeMethodExpression = mock(PsiReferenceExpression.class);
 
         PsiVariable variable = mock(PsiVariable.class);
         PsiType type = mock(PsiType.class);
@@ -185,13 +147,6 @@ public class StopThenStartOnServiceBusProcessorCheckTest {
             when(stopMethodExpression.getReferenceName()).thenReturn(stopMethod);
             when(stopMethodExpression.getQualifierExpression()).thenReturn(qualifierExpression);
             mockVisitor.visitMethodCallExpression(stopMethodCallExpression);
-        }
-
-        if (isCloseMethod) {
-            when(closeMethodCallExpression.getMethodExpression()).thenReturn(closeMethodExpression);
-            when(closeMethodExpression.getReferenceName()).thenReturn(closeMethod);
-            when(closeMethodExpression.getQualifierExpression()).thenReturn(qualifierExpression);
-            mockVisitor.visitMethodCallExpression(closeMethodCallExpression);
         }
 
         if (isStartMethod) {

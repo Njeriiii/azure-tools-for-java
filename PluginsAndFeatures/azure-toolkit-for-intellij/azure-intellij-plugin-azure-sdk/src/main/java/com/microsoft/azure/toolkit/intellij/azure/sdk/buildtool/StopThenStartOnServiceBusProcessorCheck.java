@@ -118,10 +118,6 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
             if ("stop".equals(methodName)) {
                 variableStateMap.put(variable, true); // Mark that stop was called
 
-                // If 'close' is called, remove the variable from the map -- the resource is closed and the variable is no longer in use
-            } else if ("close".equals(methodName)) {
-                variableStateMap.remove(variable); // Remove the variable from the map
-
                 // If 'start' is called and 'stop' was called on the variable, register a problem
             } else if ("start".equals(methodName) && Boolean.TRUE.equals(wasStopCalled)) {
                 holder.registerProblem(expression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
