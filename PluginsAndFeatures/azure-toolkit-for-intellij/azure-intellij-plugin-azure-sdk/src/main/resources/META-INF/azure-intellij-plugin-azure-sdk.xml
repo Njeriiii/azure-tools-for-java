@@ -221,5 +221,19 @@
                 com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.EndpointOnNonAzureOpenAIAuthCheck
             </class>
         </localInspection>
+
+        <localInspection
+                language="JAVA"
+                shortName="ImplementationTypeCheck"
+                displayName="Implementation Type Check"
+                groupName="Azure SDK"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.ImplementationTypeCheck">
+
+            <class>
+                com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.ImplementationTypeCheck
+            </class>
+        </localInspection>
     </extensions>
 </idea-plugin>

@@ -260,3 +260,13 @@ integration, telemetry connectivity, and Azure Toolkit integration.
   Please refer to
   the [KeyCredential Class documentation](https://learn.microsoft.com/java/api/com.azure.core.credential.keycredential?view=azure-java-stable)
   for more information.
+
+14. ## Using Concrete Classes Instead of Interfaces
+
+**Anti-pattern**: Using concrete classes directly instead of interfaces.
+- **Issue**: Relying on concrete classes ties your code to a specific implementation, making it harder to change the
+  underlying implementation without modifying the code that depends on it. Using interfaces or abstract classes allows
+  you to switch implementations easily.
+- **Severity: WARNING**
+- **Recommendation**: Define an interface for the class to implement and use the interface type for declarations and
+  method signatures to improve flexibility and maintainability.
