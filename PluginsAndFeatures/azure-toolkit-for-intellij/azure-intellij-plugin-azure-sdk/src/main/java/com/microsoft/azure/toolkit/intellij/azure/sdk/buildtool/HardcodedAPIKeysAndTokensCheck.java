@@ -76,7 +76,7 @@ public class HardcodedAPIKeysAndTokensCheck extends LocalInspectionTool {
                 // Check if the class reference is not null, the qualifier name starts with "com.azure" and
                 // the class reference is in the list of clients to check
                 if (newExpression.getClassReference() != null && newExpression.getClassReference().getQualifiedName().startsWith(RuleConfig.AZURE_PACKAGE_NAME) && RULE_CONFIG.getServicesToCheck().contains(classReference)) {
-                    this.holder.registerProblem(newExpression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
+                    this.holder.registerProblem(newExpression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomTooltipOnHover.showRecommendationText(RULE_CONFIG.getRecommendationText().get("recommendationText"), RULE_CONFIG.getRecommendationLink().get("recommendationLink")));
                 }
             }
         }

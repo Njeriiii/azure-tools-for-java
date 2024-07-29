@@ -95,7 +95,7 @@ public class GetSyncPollerOnPollerFluxCheck extends LocalInspectionTool {
                 boolean isAsyncContext = checkIfAsyncContext(methodCall);
 
                 if (isAsyncContext && isAzureClient(methodCall)) {
-                    holder.registerProblem(expression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
+                    holder.registerProblem(expression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomTooltipOnHover.showRecommendationText(RULE_CONFIG.getRecommendationText().get("recommendationText"), RULE_CONFIG.getRecommendationLink().get("recommendationLink")));
                 }
             }
         }

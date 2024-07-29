@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -313,6 +314,6 @@ public class SingleOperationInLoopCheckTest {
         }
 
         //  Verify problem is registered
-        verify(mockHolder, times(numberOfInvocations)).registerProblem(Mockito.eq(initializer), Mockito.contains("Single operation found in loop. This SDK provides a batch operation API, use it to perform multiple actions in a single request: " + methodName + "Batch"));
+        verify(mockHolder, times(numberOfInvocations)).registerProblem(Mockito.eq(initializer), Mockito.contains("Single operation found in loop. This SDK provides a batch operation API, use it to perform multiple actions in a single request: " + methodName + "Batch"), any(CustomTooltipOnHover.class));
     }
 }

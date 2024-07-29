@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -142,6 +143,6 @@ public class DetectDiscouragedAPIUsageCheckTest {
         (visitor).visitElement(methodCallExpression);
 
         // Verify problem is registered
-        verify(mockHolder, times(numOfInvocations)).registerProblem(Mockito.eq(problemElement), Mockito.contains(suggestionMessage));
+        verify(mockHolder, times(numOfInvocations)).registerProblem(Mockito.eq(problemElement), Mockito.contains(suggestionMessage), any(CustomTooltipOnHover.class));
     }
 }

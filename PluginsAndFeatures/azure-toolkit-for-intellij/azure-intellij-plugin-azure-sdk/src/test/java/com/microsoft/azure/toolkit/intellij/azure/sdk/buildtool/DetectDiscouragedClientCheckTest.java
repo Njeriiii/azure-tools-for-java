@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
@@ -153,6 +154,6 @@ public class DetectDiscouragedClientCheckTest {
         when(mockType.getPresentableText()).thenReturn(clientToCheck);
 
         ((JavaElementVisitor) mockVisitor).visitTypeElement(mockTypeElement);
-        verify(mockHolder, times(numberOfInvocations)).registerProblem((Mockito.eq(mockTypeElement)), Mockito.contains(suggestionMessage));
+        verify(mockHolder, times(numberOfInvocations)).registerProblem((Mockito.eq(mockTypeElement)), Mockito.contains(suggestionMessage), any(CustomTooltipOnHover.class));
     }
 }

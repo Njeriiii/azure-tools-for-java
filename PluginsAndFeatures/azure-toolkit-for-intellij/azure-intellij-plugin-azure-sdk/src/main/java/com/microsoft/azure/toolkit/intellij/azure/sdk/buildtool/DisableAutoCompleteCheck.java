@@ -124,7 +124,7 @@ public class DisableAutoCompleteCheck extends LocalInspectionTool {
                 // Process the new expression initialization
                 if (!isAutoCompleteDisabled((PsiMethodCallExpression) initializer)) {
                     // Register a problem if the auto-complete feature is not disabled
-                    holder.registerProblem(initializer, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
+                    holder.registerProblem(initializer, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomTooltipOnHover.showRecommendationText(RULE_CONFIG.getRecommendationText().get("recommendationText"), RULE_CONFIG.getRecommendationLink().get("recommendationLink")));
                 }
             }
         }

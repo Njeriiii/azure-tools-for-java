@@ -15,9 +15,12 @@ class RuleConfig {
     private final Map<String, String> antiPatternMessageMap;
     private final List<String> listedItemsToCheck;
 
+    private final Map<String, String> recommendationText;
+    private final Map<String, String> recommendationLink;
+
     static final String AZURE_PACKAGE_NAME = "com.azure";
 
-    static final RuleConfig EMPTY_RULE = new RuleConfig(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyList());
+    static final RuleConfig EMPTY_RULE = new RuleConfig(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
 
     /**
      * Constructor for RuleConfig.
@@ -27,13 +30,17 @@ class RuleConfig {
      * @param servicesToCheck           List of services to check.
      * @param antiPatternMessageMap     Map of antipattern messages to display.
      * @param listedItemsToCheck List of items to check for.
+     * @param recommendationText Map of the Recommendation text for the anti-pattern.
+     * @param recommendationLink Map of the Recommendation link for the anti-pattern.
      */
-    RuleConfig(List<String> methodsToCheck, List<String> clientsToCheck, List<String> servicesToCheck, Map<String, String> antiPatternMessageMap, List<String> listedItemsToCheck) {
+    RuleConfig(List<String> methodsToCheck, List<String> clientsToCheck, List<String> servicesToCheck, Map<String, String> antiPatternMessageMap, List<String> listedItemsToCheck, Map<String, String> recommendationText, Map<String, String> recommendationLink) {
         this.methodsToCheck = methodsToCheck;
         this.clientsToCheck = clientsToCheck;
         this.servicesToCheck = servicesToCheck;
         this.antiPatternMessageMap = antiPatternMessageMap;
         this.listedItemsToCheck = listedItemsToCheck;
+        this.recommendationText = recommendationText;
+        this.recommendationLink = recommendationLink;
     }
 
     /**
@@ -94,5 +101,23 @@ class RuleConfig {
      */
     List<String> getListedItemsToCheck() {
         return listedItemsToCheck;
+    }
+
+    /**
+     * This method returns the recommendation text
+     *
+     * @return Recommendation text
+     */
+    public Map<String, String> getRecommendationText() {
+        return recommendationText;
+    }
+
+    /**
+     * This method returns the recommendation link
+     *
+     * @return Recommendation link
+     */
+    public Map<String, String> getRecommendationLink() {
+        return recommendationLink;
     }
 }

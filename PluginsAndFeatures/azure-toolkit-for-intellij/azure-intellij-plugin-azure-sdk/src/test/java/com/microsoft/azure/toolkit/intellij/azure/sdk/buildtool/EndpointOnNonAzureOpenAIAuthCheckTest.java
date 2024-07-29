@@ -16,6 +16,9 @@ import org.mockito.Mock;
 
 import com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.EndpointOnNonAzureOpenAIAuthCheck.EndpointOnNonAzureOpenAIAuthVisitor;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -153,7 +156,6 @@ public class EndpointOnNonAzureOpenAIAuthCheckTest {
         when(argumentList.getExpressions()).thenReturn(arguments);
 
         // isKeyCredential
-
         when(newExpression.getClassReference()).thenReturn(classReference);
         when(classReference.getReferenceName()).thenReturn(keyCredentialPackageName);
 
@@ -164,6 +166,6 @@ public class EndpointOnNonAzureOpenAIAuthCheckTest {
 
         mockVisitor.visitMethodCallExpression(mockMethodCall);
 
-        verify(mockHolder, times(numOfInvocation)).registerProblem(mockMethodCall, "Endpoint should not be used with KeyCredential for non-Azure OpenAI clients");
+        verify(mockHolder, times(numOfInvocation)).registerProblem(eq(mockMethodCall), contains( "Endpoint should not be used with KeyCredential for non-Azure OpenAI clients"), any(CustomTooltipOnHover.class));
     }
 }

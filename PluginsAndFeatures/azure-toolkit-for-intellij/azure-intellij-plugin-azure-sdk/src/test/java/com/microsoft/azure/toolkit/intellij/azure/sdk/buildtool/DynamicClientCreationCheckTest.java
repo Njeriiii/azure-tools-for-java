@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -158,7 +159,7 @@ public class DynamicClientCreationCheckTest {
         //  Verify problem is registered
         verify(mockHolder,
                 times(numOfInvocations)).registerProblem(Mockito.eq(rhs),
-                Mockito.contains("Dynamic client creation detected. Create a single client instance and reuse it instead."));
+                Mockito.contains("Dynamic client creation detected. Create a single client instance and reuse it instead."), any(CustomTooltipOnHover.class));
     }
 
     /**
@@ -208,6 +209,6 @@ public class DynamicClientCreationCheckTest {
         //  Verify problem is registered
         verify(mockHolder,
                 times(numOfInvocations)).registerProblem(Mockito.eq(initializer),
-                Mockito.contains("Dynamic client creation detected. Create a single client instance and reuse it instead."));
+                Mockito.contains("Dynamic client creation detected. Create a single client instance and reuse it instead."), any(CustomTooltipOnHover.class));
     }
 }

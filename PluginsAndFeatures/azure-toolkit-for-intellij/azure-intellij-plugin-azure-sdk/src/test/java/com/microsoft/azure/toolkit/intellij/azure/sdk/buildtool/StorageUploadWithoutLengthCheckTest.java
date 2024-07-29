@@ -17,6 +17,7 @@ import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiReferenceExpression;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
@@ -125,7 +126,7 @@ public class StorageUploadWithoutLengthCheckTest {
         ((JavaRecursiveElementWalkingVisitor) visitor).visitMethodCallExpression(mockExpression);
 
         // Verify registerProblem is called
-        verify(mockHolder, times(NUMBER_OF_INVOCATIONS)).registerProblem(Mockito.eq(mockExpression), Mockito.contains("Azure Storage upload API without length parameter detected"));
+        verify(mockHolder, times(NUMBER_OF_INVOCATIONS)).registerProblem(Mockito.eq(mockExpression), Mockito.contains("Azure Storage upload API without length parameter detected"), any(CustomTooltipOnHover.class));
     }
 
     /**

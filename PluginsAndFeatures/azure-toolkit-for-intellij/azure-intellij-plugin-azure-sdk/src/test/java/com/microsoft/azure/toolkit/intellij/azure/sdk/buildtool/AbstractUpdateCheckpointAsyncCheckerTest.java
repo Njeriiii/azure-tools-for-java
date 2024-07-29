@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -185,9 +186,9 @@ public class AbstractUpdateCheckpointAsyncCheckerTest {
         mockVisitor.visitMethodCallExpression(mockMethodCallExpression);
 
         if (followingMethod != null && followingMethod.equals("subscribe")) {
-            verify(mockHolder, times(numOfInvocations)).registerProblem(eq(mockMethodCallExpression), contains("Instead of `subscribe()`, call `block()` or `block()` with timeout, or use the synchronous version `updateCheckpoint()`"));
+            verify(mockHolder, times(numOfInvocations)).registerProblem(eq(mockMethodCallExpression), contains("Instead of `subscribe()`, call `block()` or `block()` with timeout, or use the synchronous version `updateCheckpoint()`"), any(CustomTooltipOnHover.class));
         } else {
-            verify(mockHolder, times(numOfInvocations)).registerProblem(eq(mockMethodCallExpression), contains("Calling updateCheckpointAsync() without block() will not do anything, use `block()` or `block` operator with a timeout, or consider using the synchronous version `updateCheckpoint()."));
+            verify(mockHolder, times(numOfInvocations)).registerProblem(eq(mockMethodCallExpression), contains("Calling updateCheckpointAsync() without block() will not do anything, use `block()` or `block` operator with a timeout, or consider using the synchronous version `updateCheckpoint()."), any(CustomTooltipOnHover.class));
         }
     }
 }
