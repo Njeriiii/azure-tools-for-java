@@ -56,7 +56,7 @@ public class ServiceBusReceiverAsyncClientCheck extends LocalInspectionTool {
 
                     // Register a problem if the client used matches the discouraged client
                     if (element.getType().getPresentableText().equals(RULE_CONFIG.getClientsToCheck().get(0))) {
-                        holder.registerProblem(element, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomQuickFix.showRecommendationText(RULE_CONFIG.getRecommendationText(), RULE_CONFIG.getRecommendationLink()));
+                        holder.registerProblem(element, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomTooltipOnHover.showRecommendationText(RULE_CONFIG.getRecommendationText().get("recommendationText"), RULE_CONFIG.getRecommendationLink().get("recommendationLink")));
                     }
                 }
             }

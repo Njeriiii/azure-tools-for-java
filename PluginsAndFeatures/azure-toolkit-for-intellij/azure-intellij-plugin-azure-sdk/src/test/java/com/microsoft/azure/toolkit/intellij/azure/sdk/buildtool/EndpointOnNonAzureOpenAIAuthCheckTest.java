@@ -166,6 +166,6 @@ public class EndpointOnNonAzureOpenAIAuthCheckTest {
 
         mockVisitor.visitMethodCallExpression(mockMethodCall);
 
-        verify(mockHolder, times(numOfInvocation)).registerProblem(eq(mockMethodCall), contains( "Endpoint should not be used with KeyCredential for non-Azure OpenAI clients"), any(CustomQuickFix.class));
+        verify(mockHolder, times(numOfInvocation)).registerProblem(eq(mockMethodCall), contains( "Endpoint should not be used with KeyCredential for non-Azure OpenAI clients"), any(CustomTooltipOnHover.class));
     }
 }

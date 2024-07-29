@@ -89,7 +89,7 @@ public class EndpointOnNonAzureOpenAIAuthCheck extends LocalInspectionTool {
                 // Using KeyCredential indicates authentication of a non-Azure OpenAI client
                 // If the endpoint method is used with KeyCredential for non-Azure OpenAI clients, a warning is registered
                 if (isUsingKeyCredential(expression)) {
-                    holder.registerProblem(expression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomQuickFix.showRecommendationText(RULE_CONFIG.getRecommendationText(), RULE_CONFIG.getRecommendationLink()));
+                    holder.registerProblem(expression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomTooltipOnHover.showRecommendationText(RULE_CONFIG.getRecommendationText().get("recommendationText"), RULE_CONFIG.getRecommendationLink().get("recommendationLink")));
                 }
             }
         }

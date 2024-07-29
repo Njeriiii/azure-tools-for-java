@@ -243,7 +243,7 @@ public class SingleOperationInLoopCheck extends LocalInspectionTool {
                 if (isAzureTextAnalyticsClientOperation((PsiMethodCallExpression) initializer)) {
                     // get the method name
                     String methodName = ((PsiMethodCallExpression) initializer).getMethodExpression().getReferenceName();
-                    holder.registerProblem(initializer, (RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage") + methodName + "Batch"), CustomQuickFix.showRecommendationText(RULE_CONFIG.getRecommendationText(), RULE_CONFIG.getRecommendationLink()));
+                    holder.registerProblem(initializer, (RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage") + methodName + "Batch"), CustomTooltipOnHover.showRecommendationText(RULE_CONFIG.getRecommendationText().get("recommendationText"), RULE_CONFIG.getRecommendationLink().get("recommendationLink")));
                 }
             }
         }

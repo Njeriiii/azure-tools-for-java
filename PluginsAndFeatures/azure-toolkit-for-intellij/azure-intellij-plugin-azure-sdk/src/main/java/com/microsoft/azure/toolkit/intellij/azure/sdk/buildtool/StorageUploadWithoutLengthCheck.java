@@ -88,7 +88,7 @@ public class StorageUploadWithoutLengthCheck extends LocalInspectionTool {
                     }
                 }
                 if (!hasLengthArg) {
-                    holder.registerProblem(expression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomQuickFix.showRecommendationText(RULE_CONFIG.getRecommendationText(), RULE_CONFIG.getRecommendationLink()));
+                    holder.registerProblem(expression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"),CustomTooltipOnHover.showRecommendationText(RULE_CONFIG.getRecommendationText().get("recommendationText"), RULE_CONFIG.getRecommendationLink().get("recommendationLink")));
                 }
             }
         };

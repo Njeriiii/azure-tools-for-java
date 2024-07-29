@@ -75,7 +75,7 @@ public class DetectDiscouragedClientCheck extends LocalInspectionTool {
                 String elementType = element.getType().getPresentableText();
 
                 // Register a problem if the client used matches a discouraged client
-                holder.registerProblem(element, RULE_CONFIG.getAntiPatternMessageMap().get(elementType), CustomQuickFix.showRecommendationText(RULE_CONFIG.getRecommendationText(), RULE_CONFIG.getRecommendationLink()));
+                holder.registerProblem(element, RULE_CONFIG.getAntiPatternMessageMap().get(elementType), CustomTooltipOnHover.showRecommendationText(RULE_CONFIG.getRecommendationText().get(elementType), RULE_CONFIG.getRecommendationLink().get(elementType)));
             }
         }
     }

@@ -112,7 +112,7 @@ public class DetectDiscouragedAPIUsageCheck extends LocalInspectionTool {
                             return;
                         }
                         // give the suggestion of the discouraged method
-                        holder.registerProblem(problemElement, RULE_CONFIG.getAntiPatternMessageMap().get(method.getName()), CustomQuickFix.showRecommendationText(RULE_CONFIG.getRecommendationText(), RULE_CONFIG.getRecommendationLink()));
+                        holder.registerProblem(problemElement, RULE_CONFIG.getAntiPatternMessageMap().get(method.getName()), CustomTooltipOnHover.showRecommendationText(RULE_CONFIG.getRecommendationText().get(method.getName()), RULE_CONFIG.getRecommendationLink().get(method.getName())));
                     }
                 }
             }

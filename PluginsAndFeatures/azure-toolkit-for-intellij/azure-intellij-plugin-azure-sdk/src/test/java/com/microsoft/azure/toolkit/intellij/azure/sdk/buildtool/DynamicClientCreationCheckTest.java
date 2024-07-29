@@ -159,7 +159,7 @@ public class DynamicClientCreationCheckTest {
         //  Verify problem is registered
         verify(mockHolder,
                 times(numOfInvocations)).registerProblem(Mockito.eq(rhs),
-                Mockito.contains("Dynamic client creation detected. Create a single client instance and reuse it instead."), any(CustomQuickFix.class));
+                Mockito.contains("Dynamic client creation detected. Create a single client instance and reuse it instead."), any(CustomTooltipOnHover.class));
     }
 
     /**
@@ -209,6 +209,6 @@ public class DynamicClientCreationCheckTest {
         //  Verify problem is registered
         verify(mockHolder,
                 times(numOfInvocations)).registerProblem(Mockito.eq(initializer),
-                Mockito.contains("Dynamic client creation detected. Create a single client instance and reuse it instead."), any(CustomQuickFix.class));
+                Mockito.contains("Dynamic client creation detected. Create a single client instance and reuse it instead."), any(CustomTooltipOnHover.class));
     }
 }

@@ -200,6 +200,6 @@ public class DisableAutoCompleteCheckTest {
         }
 
         mockVisitor.visitDeclarationStatement(mockDeclarationStatement);
-        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(initializer), contains("Auto-complete enabled by default. Use the disableAutoComplete() API call to prevent automatic message completion."), any(CustomQuickFix.class));
+        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(initializer), contains("Auto-complete enabled by default. Use the disableAutoComplete() API call to prevent automatic message completion."), any(CustomTooltipOnHover.class));
     }
 }

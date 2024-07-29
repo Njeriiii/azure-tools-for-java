@@ -143,6 +143,6 @@ public class DetectDiscouragedAPIUsageCheckTest {
         (visitor).visitElement(methodCallExpression);
 
         // Verify problem is registered
-        verify(mockHolder, times(numOfInvocations)).registerProblem(Mockito.eq(problemElement), Mockito.contains(suggestionMessage), any(CustomQuickFix.class));
+        verify(mockHolder, times(numOfInvocations)).registerProblem(Mockito.eq(problemElement), Mockito.contains(suggestionMessage), any(CustomTooltipOnHover.class));
     }
 }

@@ -15,12 +15,12 @@ class RuleConfig {
     private final Map<String, String> antiPatternMessageMap;
     private final List<String> listedItemsToCheck;
 
-    private final String recommendationText;
-    private final String recommendationLink;
+    private final Map<String, String> recommendationText;
+    private final Map<String, String> recommendationLink;
 
     static final String AZURE_PACKAGE_NAME = "com.azure";
 
-    static final RuleConfig EMPTY_RULE = new RuleConfig(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyList(), "", "");
+    static final RuleConfig EMPTY_RULE = new RuleConfig(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
 
     /**
      * Constructor for RuleConfig.
@@ -30,10 +30,10 @@ class RuleConfig {
      * @param servicesToCheck           List of services to check.
      * @param antiPatternMessageMap     Map of antipattern messages to display.
      * @param listedItemsToCheck List of items to check for.
-     * @param recommendationText Recommendation text for the antipattern.
-     * @param recommendationLink Recommendation link for the antipattern.
+     * @param recommendationText Map of the Recommendation text for the anti-pattern.
+     * @param recommendationLink Map of the Recommendation link for the anti-pattern.
      */
-    RuleConfig(List<String> methodsToCheck, List<String> clientsToCheck, List<String> servicesToCheck, Map<String, String> antiPatternMessageMap, List<String> listedItemsToCheck, String recommendationText, String recommendationLink) {
+    RuleConfig(List<String> methodsToCheck, List<String> clientsToCheck, List<String> servicesToCheck, Map<String, String> antiPatternMessageMap, List<String> listedItemsToCheck, Map<String, String> recommendationText, Map<String, String> recommendationLink) {
         this.methodsToCheck = methodsToCheck;
         this.clientsToCheck = clientsToCheck;
         this.servicesToCheck = servicesToCheck;
@@ -108,7 +108,7 @@ class RuleConfig {
      *
      * @return Recommendation text
      */
-    public String getRecommendationText() {
+    public Map<String, String> getRecommendationText() {
         return recommendationText;
     }
 
@@ -117,7 +117,7 @@ class RuleConfig {
      *
      * @return Recommendation link
      */
-    public String getRecommendationLink() {
+    public Map<String, String> getRecommendationLink() {
         return recommendationLink;
     }
 }

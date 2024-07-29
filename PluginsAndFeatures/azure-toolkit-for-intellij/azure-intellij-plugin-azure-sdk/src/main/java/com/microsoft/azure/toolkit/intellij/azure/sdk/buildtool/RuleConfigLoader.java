@@ -132,8 +132,8 @@ class RuleConfigLoader {
         List<String> servicesToCheck = new ArrayList<>();
         Map<String, String> antiPatternMessageMap = new HashMap<>();
         List<String> listedItemsToCheck = new ArrayList<>();
-        String recommendationText = null;
-        String recommendationLink = null;
+        Map<String, String> recommendationTextMap = new HashMap<>();
+        Map<String, String> recommendationLinkMap = new HashMap<>();
 
         // Check if the JSON file starts with an object
         if (reader.nextToken() != JsonToken.START_OBJECT) {
@@ -151,7 +151,7 @@ class RuleConfigLoader {
                     methodsToCheck = getListFromJsonArray(reader);
                     break;
                 case "antiPatternMessage":
-                    antiPatternMessageMap = getMapFromJsonObject(reader, antiPatternMessageMap);
+                    antiPatternMessageMap = getMapFromJsonObject(reader, antiPatternMessageMap, recommendationTextMap, recommendationLinkMap);
                     break;
                 case "clientsToCheck":
                     clientsToCheck = getListFromJsonArray(reader);
@@ -163,23 +163,23 @@ class RuleConfigLoader {
                     listedItemsToCheck = getValuesFromJsonReader(reader);
                     break;
                 case "recommendationText":
-                    recommendationText = reader.getString();
+                    recommendationTextMap = getMapFromJsonObject(reader, antiPatternMessageMap, recommendationTextMap, recommendationLinkMap);
                     break;
                 case "recommendationLink":
-                    recommendationLink = reader.getString();
+                    recommendationLinkMap = getMapFromJsonObject(reader, antiPatternMessageMap, recommendationTextMap, recommendationLinkMap);
                     break;
                 default:
                     if (fieldName.endsWith("Check")) {
                         // Move to the next token to process the nested object
                         reader.nextToken();
-                        antiPatternMessageMap = getMapFromJsonObject(reader, antiPatternMessageMap);
+                        antiPatternMessageMap = getMapFromJsonObject(reader, antiPatternMessageMap, recommendationTextMap, recommendationLinkMap);
                     } else {
                         reader.skipChildren();
                     }
                     break;
             }
         }
-        return new RuleConfig(methodsToCheck, clientsToCheck, servicesToCheck, antiPatternMessageMap, listedItemsToCheck, recommendationText, recommendationLink);
+        return new RuleConfig(methodsToCheck, clientsToCheck, servicesToCheck, antiPatternMessageMap, listedItemsToCheck, recommendationTextMap, recommendationLinkMap);
     }
 
     /**
@@ -221,10 +221,12 @@ class RuleConfigLoader {
      * @return Map of strings parsed from the JSON object
      * @throws IOException - if there is an error reading the file
      */
-    private Map<String, String> getMapFromJsonObject(JsonReader reader, Map<String, String> antiPatternMessageMap) throws IOException {
+    private Map<String, String> getMapFromJsonObject(JsonReader reader, Map<String, String> antiPatternMessageMap, Map<String, String> recommendationTextMap, Map<String, String> recommendationLinkMap) throws IOException {
 
         String identifiersToCheck = null;
         String antiPatternMessage = null;
+        String recommendationText = null;
+        String recommendationLink = null;
 
         // Read the JSON file and parse the RuleConfig object
         while (reader.nextToken() != JsonToken.END_OBJECT) {
@@ -238,6 +240,12 @@ class RuleConfigLoader {
                     break;
                 case "antiPatternMessage":
                     antiPatternMessage = reader.getString();
+                    break;
+                case "recommendationText":
+                    recommendationText = reader.getString();
+                    break;
+                case "recommendationLink":
+                    recommendationLink = reader.getString();
                     break;
                 default:
                     reader.skipChildren();
@@ -255,9 +263,46 @@ class RuleConfigLoader {
                     return antiPatternMessageMap;
                 }
             }
+
+            // Add to map based on conditions
+            if (recommendationText != null) {
+
+                // This map is for base classes that have a set of discouraged identifiers and a corresponding set of recommendations
+                if (identifiersToCheck != null) {
+                    recommendationTextMap.put(identifiersToCheck, recommendationText);
+                } else {
+                    // This map is for single recommendations of a particular rule
+                    recommendationTextMap.put(fieldName, recommendationText);
+                    return recommendationTextMap;
+                }
+            }
+
+            // Add to map based on conditions
+            if (recommendationLink != null) {
+
+                // This map is for base classes that have a set of discouraged identifiers and a corresponding set of recommendations
+                if (identifiersToCheck != null) {
+                    recommendationLinkMap.put(identifiersToCheck, recommendationLink);
+                } else {
+                    // This map is for single recommendations of a particular rule
+                    recommendationLinkMap.put(fieldName, recommendationLink);
+                    return recommendationLinkMap;
+                }
+            }
         }
-        // This map is to return mapped anti-pattern messages that have a set of discouraged identifiers and a corresponding set of antipattern messages
-        return antiPatternMessageMap;
+
+        // This section is to return mapped anti-pattern messages, recommendations and links that have a set of discouraged identifiers and a corresponding set of items
+
+        if (antiPatternMessage != null) {
+            return antiPatternMessageMap;
+        }
+        if (recommendationText != null) {
+            return recommendationTextMap;
+        }
+        if (recommendationLink != null) {
+            return recommendationLinkMap;
+        }
+        return new HashMap<>();
     }
 
     /**

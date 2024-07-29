@@ -173,7 +173,7 @@ class KustoQueriesWithTimeIntervalInQueryStringCheckTest {
         mockVisitor.visitElement(methodCall);
 
         // Verify that the problem was registered correctly for the method call
-        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(methodCall), contains("KQL queries with time intervals in the query string detected."), any(CustomQuickFix.class));
+        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(methodCall), contains("KQL queries with time intervals in the query string detected."), any(CustomTooltipOnHover.class));
     }
 
     void verifyRegisterProblemWithPolyadicExpression(String queryString, String packageName, int numOfInvocations) {
@@ -218,6 +218,6 @@ class KustoQueriesWithTimeIntervalInQueryStringCheckTest {
         mockVisitor.visitElement(methodCall);
 
         // Verify that the problem was registered correctly for the method call
-        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(methodCall), contains("KQL queries with time intervals in the query string detected."), any(CustomQuickFix.class));
+        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(methodCall), contains("KQL queries with time intervals in the query string detected."), any(CustomTooltipOnHover.class));
     }
 }

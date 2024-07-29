@@ -127,7 +127,7 @@ public class DynamicClientCreationCheck extends LocalInspectionTool {
 
                 // Check if the right-hand side is a method call expression
                 if (rhs != null && isClientCreationMethod((PsiMethodCallExpression) rhs)) {
-                    holder.registerProblem(rhs, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomQuickFix.showRecommendationText(RULE_CONFIG.getRecommendationText(), RULE_CONFIG.getRecommendationLink()));
+                    holder.registerProblem(rhs, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomTooltipOnHover.showRecommendationText(RULE_CONFIG.getRecommendationText().get("recommendationText"), RULE_CONFIG.getRecommendationLink().get("recommendationLink")));
                 }
             } else if (blockChild instanceof PsiDeclarationStatement) {    // This is a check for the declaration statement
 
@@ -152,7 +152,7 @@ public class DynamicClientCreationCheck extends LocalInspectionTool {
                     // Check if the initializer is a method call expression
                     PsiMethodCallExpression methodCallExpression = (PsiMethodCallExpression) initializer;
                     if (isClientCreationMethod(methodCallExpression)) {
-                        holder.registerProblem(methodCallExpression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomQuickFix.showRecommendationText(RULE_CONFIG.getRecommendationText(), RULE_CONFIG.getRecommendationLink()));
+                        holder.registerProblem(methodCallExpression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomTooltipOnHover.showRecommendationText(RULE_CONFIG.getRecommendationText().get("recommendationText"), RULE_CONFIG.getRecommendationLink().get("recommendationLink")));
                     }
                 }
             }

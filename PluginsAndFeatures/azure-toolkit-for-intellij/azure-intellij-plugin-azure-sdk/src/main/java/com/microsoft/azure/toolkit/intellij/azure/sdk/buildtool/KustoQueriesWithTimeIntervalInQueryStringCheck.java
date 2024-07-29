@@ -232,7 +232,7 @@ public class KustoQueriesWithTimeIntervalInQueryStringCheck extends LocalInspect
                 }
 
                 if (isAzureClient(methodCall)) {
-                    holder.registerProblem(methodCall, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomQuickFix.showRecommendationText(RULE_CONFIG.getRecommendationText(), RULE_CONFIG.getRecommendationLink()));
+                    holder.registerProblem(methodCall, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), CustomTooltipOnHover.showRecommendationText(RULE_CONFIG.getRecommendationText().get("recommendationText"), RULE_CONFIG.getRecommendationLink().get("recommendationLink")));
                 }
             }
         }

@@ -314,6 +314,6 @@ public class SingleOperationInLoopCheckTest {
         }
 
         //  Verify problem is registered
-        verify(mockHolder, times(numberOfInvocations)).registerProblem(Mockito.eq(initializer), Mockito.contains("Single operation found in loop. This SDK provides a batch operation API, use it to perform multiple actions in a single request: " + methodName + "Batch"), any(CustomQuickFix.class));
+        verify(mockHolder, times(numberOfInvocations)).registerProblem(Mockito.eq(initializer), Mockito.contains("Single operation found in loop. This SDK provides a batch operation API, use it to perform multiple actions in a single request: " + methodName + "Batch"), any(CustomTooltipOnHover.class));
     }
 }

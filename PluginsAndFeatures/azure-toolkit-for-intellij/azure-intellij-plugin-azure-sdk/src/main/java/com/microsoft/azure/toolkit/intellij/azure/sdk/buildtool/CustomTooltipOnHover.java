@@ -1,6 +1,5 @@
 package com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool;
 
-
 import com.intellij.codeInspection.LocalQuickFix;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.ide.BrowserUtil;
@@ -19,7 +18,6 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.openapi.editor.EditorFactory;
 import org.jetbrains.annotations.NotNull;
 
-
 import javax.swing.JEditorPane;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -32,18 +30,18 @@ import javax.swing.text.html.StyleSheet;
 /**
  * This class is used to create a custom quick fix that shows a tooltip with a recommendation text and a link to the Azure SDK for Java documentation.
  */
-public class CustomQuickFix implements LocalQuickFix {
+class CustomTooltipOnHover implements LocalQuickFix {
 
     private final String recommendationText;
     private final String linkUrl;
 
     /**
-     * Constructor for CustomQuickFix.
+     * Constructor for CustomTooltipOnHover.
      *
      * @param recommendationText - the recommendation text to be shown in the tooltip
      * @param linkUrl            - the URL to be opened when the user clicks on the link in the tooltip
      */
-    public CustomQuickFix(String recommendationText, String linkUrl) {
+    CustomTooltipOnHover(String recommendationText, String linkUrl) {
         this.recommendationText = recommendationText;
         this.linkUrl = linkUrl;
     }
@@ -70,7 +68,7 @@ public class CustomQuickFix implements LocalQuickFix {
     }
 
     /**
-     * This method is used to apply the fix when the user clicks on the "Show Details" link in the tooltip.
+     * This method is used to display the tooltip when the user clicks on the "Show Details" link in the tooltip.
      *
      * @param project    The project in which the problem was found.
      * @param descriptor The descriptor for the problem that was found.
@@ -108,7 +106,7 @@ public class CustomQuickFix implements LocalQuickFix {
         editorPane.setContentType("text/html");
 
         // Combine the recommendation text and the link on the same line
-        String htmlContent = "<html><body style='width: 500px; color: #B0B0B0;'>" + recommendationText + " <a href='" + linkUrl + "'>Refer to Azure SDK for Java documentation</a>" + "</body></html>";
+        String htmlContent = "<html><body style='width: 500px; color: #B0B0B0;'>" + recommendationText + " <a href='" + linkUrl + "'>Refer to Azure SDK for Java documentation</a>" + " for more information on this suggestion. </body></html>";
 
         // Set the HTML content to the editorPane
         editorPane.setText(htmlContent);
@@ -139,7 +137,14 @@ public class CustomQuickFix implements LocalQuickFix {
                 .createBalloon().show(relativePoint, Balloon.Position.above);
     }
 
-    static CustomQuickFix showRecommendationText(String recommendationText, String linkUrl) {
-        return new CustomQuickFix(recommendationText, linkUrl);
+    /**
+     * This method is used to show a recommendation text with a link to the Azure SDK for Java documentation.
+     *
+     * @param recommendationText - the recommendation text to be shown in the tooltip
+     * @param linkUrl            - the URL to be opened when the user clicks on the link in the tooltip
+     * @return CustomTooltipOnHover object
+     */
+    static CustomTooltipOnHover showRecommendationText(String recommendationText, String linkUrl) {
+        return new CustomTooltipOnHover(recommendationText, linkUrl);
     }
 }

@@ -126,7 +126,7 @@ public class StorageUploadWithoutLengthCheckTest {
         ((JavaRecursiveElementWalkingVisitor) visitor).visitMethodCallExpression(mockExpression);
 
         // Verify registerProblem is called
-        verify(mockHolder, times(NUMBER_OF_INVOCATIONS)).registerProblem(Mockito.eq(mockExpression), Mockito.contains("Azure Storage upload API without length parameter detected"), any(CustomQuickFix.class));
+        verify(mockHolder, times(NUMBER_OF_INVOCATIONS)).registerProblem(Mockito.eq(mockExpression), Mockito.contains("Azure Storage upload API without length parameter detected"), any(CustomTooltipOnHover.class));
     }
 
     /**

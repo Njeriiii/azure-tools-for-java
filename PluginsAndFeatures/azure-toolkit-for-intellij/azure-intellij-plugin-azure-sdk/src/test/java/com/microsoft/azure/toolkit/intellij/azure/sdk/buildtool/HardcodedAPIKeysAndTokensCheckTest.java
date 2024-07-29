@@ -105,6 +105,6 @@ public class HardcodedAPIKeysAndTokensCheckTest {
         mockVisitor.visitElement(newExpression);
 
         // Verify registerProblem is called
-        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(newExpression), Mockito.contains("DefaultAzureCredential is recommended for authentication if the service client supports Token Credential (Entra ID Authentication). " + "If not, then use Azure Key Credential for API key based authentication."), any(CustomQuickFix.class));
+        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(newExpression), Mockito.contains("DefaultAzureCredential is recommended for authentication if the service client supports Token Credential (Entra ID Authentication). " + "If not, then use Azure Key Credential for API key based authentication."), any(CustomTooltipOnHover.class));
     }
 }

@@ -158,6 +158,6 @@ public class GetSyncPollerOnPollerFluxCheckTest {
         verify(mockHolder, times(numberOfInvocations)).registerProblem(Mockito.
                 eq(mockElement),
                 Mockito.contains("Use of getSyncPoller() on a PollerFlux detected. Directly use SyncPoller to handle synchronous polling tasks"),
-                any(CustomQuickFix.class));
+                any(CustomTooltipOnHover.class));
     }
 }

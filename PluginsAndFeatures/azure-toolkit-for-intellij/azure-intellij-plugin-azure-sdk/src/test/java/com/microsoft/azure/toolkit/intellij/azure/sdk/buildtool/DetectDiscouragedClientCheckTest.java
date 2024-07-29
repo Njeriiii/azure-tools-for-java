@@ -154,6 +154,6 @@ public class DetectDiscouragedClientCheckTest {
         when(mockType.getPresentableText()).thenReturn(clientToCheck);
 
         ((JavaElementVisitor) mockVisitor).visitTypeElement(mockTypeElement);
-        verify(mockHolder, times(numberOfInvocations)).registerProblem((Mockito.eq(mockTypeElement)), Mockito.contains(suggestionMessage), any(CustomQuickFix.class));
+        verify(mockHolder, times(numberOfInvocations)).registerProblem((Mockito.eq(mockTypeElement)), Mockito.contains(suggestionMessage), any(CustomTooltipOnHover.class));
     }
 }

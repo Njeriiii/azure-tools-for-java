@@ -239,6 +239,6 @@ public class ServiceBusReceiveModeCheckTest {
         }
 
         mockVisitor.visitDeclarationStatement(mockDeclarationStatement);
-        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(prefetchCountMethod), contains("A high prefetch value in PEEK_LOCK detected. We recommend a prefetch value of 0 or 1 for efficient message retrieval."), any(CustomQuickFix.class));
+        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(prefetchCountMethod), contains("A high prefetch value in PEEK_LOCK detected. We recommend a prefetch value of 0 or 1 for efficient message retrieval."), any(CustomTooltipOnHover.class));
     }
 }
