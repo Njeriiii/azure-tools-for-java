@@ -5,34 +5,22 @@ import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.JavaElementVisitor;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiClassType;
-import com.intellij.psi.PsiModifier;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.PsiVariable;
 import org.jetbrains.annotations.NotNull;
 
-
 /**
- * This class checks for the usage of concrete classes to promote better design practices.
- *
- * <p>Two main cases are flagged:</p>
- *
- * <ul>
- *   <li><b>Case 1:</b> The class does not implement any interfaces or extend any classes (except java.lang.Object).
- *   <br>This is flagged because it is a standalone concrete class, which limits flexibility and testability.</li>
- *
- *   <li><b>Case 2:</b> The class implements interfaces or extends a superclass, but is directly used as a concrete type.
- *   <br>This is flagged because, even though the class is part of a hierarchy, using the concrete type directly bypasses the benefits of programming to an interface, such as flexibility and ease of testing.</li>
- * </ul>
- *
- * <p>Classes that only implement or extend Java utility classes/interfaces are not flagged, as they are considered part of the standard Java hierarchy.</p>
+ * This class is an inspection tool that checks if a variable type is an Azure implementation type.
+ * If the variable type is an Azure implementation type, or if the variable type extends or implements an Azure implementation type,
+ * the inspection tool will flag it as a problem.
  */
-
 public class ImplementationTypeCheck extends LocalInspectionTool {
 
     /**
      * Build the visitor for the inspection. This visitor will be used to traverse the PSI tree.
      *
      * @param holder The holder for the problems found
+     *@param isOnTheFly Whether the inspection is being run on the fly - This is not used in this implementation, but is required by the interface
      * @return The visitor for the inspection
      */
     @NotNull
@@ -43,8 +31,7 @@ public class ImplementationTypeCheck extends LocalInspectionTool {
 
     /**
      * This class extends the JavaElementVisitor to visit the elements in the code.
-     * It checks if the variable type is a concrete class and if the class has implemented interfaces.
-     * If both conditions are met, a problem is registered with the suggestion message to use interfaces instead of concrete classes.
+     * It checks if the variable type is an Azure implementation type and flags it as a problem if it is.
      */
     static class ImplementationTypeVisitor extends JavaElementVisitor {
 
@@ -62,20 +49,19 @@ public class ImplementationTypeCheck extends LocalInspectionTool {
         // Define constants for string literals
         private static final RuleConfig RULE_CONFIG;
         private static final boolean SKIP_WHOLE_RULE;
+        private static final String RULE_NAME = "ImplementationTypeCheck";
 
         static {
-            final String ruleName = "ImplementationTypeCheck";
             RuleConfigLoader centralRuleConfigLoader = RuleConfigLoader.getInstance();
 
             // Get the RuleConfig object for the rule
-            RULE_CONFIG = centralRuleConfigLoader.getRuleConfig(ruleName);
-            SKIP_WHOLE_RULE = RULE_CONFIG.skipRuleCheck() || RULE_CONFIG.getAntiPatternMessageMap().isEmpty();
+            RULE_CONFIG = centralRuleConfigLoader.getRuleConfig(RULE_NAME);
+            SKIP_WHOLE_RULE = RULE_CONFIG.skipRuleCheck() || RULE_CONFIG.getAntiPatternMessageMap().isEmpty() || RULE_CONFIG.getListedItemsToCheck().isEmpty();
         }
 
         /**
          * This method visits the variables in the code.
-         * It checks if the variable type is a concrete class and if the class has implemented interfaces.
-         * If both conditions are met, a problem is registered with the suggestion message to use interfaces instead of concrete classes.
+         * It checks if the variable type is an Azure implementation type and flags it as a problem if it is.
          */
         @Override
         public void visitVariable(@NotNull PsiVariable variable) {
@@ -89,25 +75,21 @@ public class ImplementationTypeCheck extends LocalInspectionTool {
             // eg. List<String> myList = new ArrayList<>(); -> type = List<String>
             PsiType type = variable.getType();
 
-            if (isConcreteClass(type)) {
+            // Check if the type directly used is an implementation type
+            if (isImplementationType(type) && variable.getNameIdentifier() != null) {
+                holder.registerProblem(variable.getNameIdentifier(), RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
 
-                // Handle the concrete implementation type
-                PsiClass psiClass = ((PsiClassType) type).resolve();
-
-                if (psiClass != null && hasImplementedInterfaces(type)) {
-                    holder.registerProblem(variable, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
-                }
+                // Check if the type extends or implements an implementation type
+            } else if (ExtendsOrImplementsImplementationType(type) && variable.getNameIdentifier() != null) {
+                holder.registerProblem(variable.getNameIdentifier(), RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
             }
         }
 
         /**
-         * This method checks if the type is a concrete class.
-         * This is done by checking if the type is a class and if the class is not an interface or abstract class.
-         *
-         * @param type The type to check
-         * @return True if the type is a concrete class, false otherwise
+         * This method checks if the type is a class from the Azure package and if it is an implementation type.
+         * It returns true if the type is an implementation type and false otherwise.
          */
-        private boolean isConcreteClass(PsiType type) {
+        private boolean isImplementationType(PsiType type) {
 
             if (!(type instanceof PsiClassType)) {
                 return false;
@@ -117,57 +99,42 @@ public class ImplementationTypeCheck extends LocalInspectionTool {
             if (psiClass == null) {
                 return false;
             }
-
-            // isInterface() returns true if the class is an interface
-            // hasModifierProperty returns true if the class is abstract
-            return !psiClass.isInterface() && !psiClass.hasModifierProperty(PsiModifier.ABSTRACT);
+            // Check if the class is in the Azure package and if it is an implementation type
+            return psiClass.getQualifiedName().startsWith(RuleConfig.AZURE_PACKAGE_NAME) && psiClass.getQualifiedName().contains(RULE_CONFIG.getListedItemsToCheck().get(0));
         }
 
         /**
-         * This method checks if the class has implemented interfaces.
-         * This is done by checking if the class implements interfaces or extends a class that is not
-         * from the java.lang package.
-         *
-         * @param type The type to check
-         * @return True if the class has implemented interfaces, false otherwise
+         * This method checks if the type is a class that extends or implements an implementation type.
+         * It returns true if the type extends or implements an implementation type and false otherwise.
          */
-        private boolean hasImplementedInterfaces(PsiType type) {
+        private boolean ExtendsOrImplementsImplementationType(PsiType type) {
             if (type instanceof PsiClassType) {
                 PsiClass psiClass = ((PsiClassType) type).resolve();
 
                 if (psiClass != null) {
-                    // Exclude classes from java.lang package
-                    if (psiClass.getQualifiedName() != null && (psiClass.getQualifiedName().startsWith("java.") || psiClass.getQualifiedName().startsWith("javax."))) {
-                        return false;
-                    }
 
                     PsiClass[] interfaces = psiClass.getInterfaces();
                     PsiClass superClass = psiClass.getSuperClass();
 
                     // Case 1: Class has no implemented interfaces and does not extend any class
                     if (interfaces.length == 0 && superClass != null && superClass.getQualifiedName().equals("java.lang.Object")) {
-                        return true;
+                        return false;
                     }
 
-                    // Case 2: Class has implemented interfaces or extends a class that is not from java.lang package
+                    // Case 2: Class has implemented interfaces or extends a class that is an implementation type
                     if (interfaces.length > 0 || (superClass != null && !superClass.getQualifiedName().startsWith("java."))) {
 
                         for (PsiClass iface : interfaces) {
 
-                            // If none of the interfaces are from java.lang or javax packages return true
+                            // If the interface is from the Azure package and is an implementation type return true
                             String ifaceName = iface.getQualifiedName();
-                            if (ifaceName != null && !ifaceName.startsWith("java.") && !ifaceName.startsWith("javax.")) {
-                                return true;
-                            }
+                            return ifaceName != null && ifaceName.startsWith(RuleConfig.AZURE_PACKAGE_NAME) && ifaceName.contains(RULE_CONFIG.getListedItemsToCheck().get(0));
                         }
 
-                        // If the super class is not from java.lang or javax packages return true
-                        if (superClass != null) {
-                            String superClassName = superClass.getQualifiedName();
-                            return superClassName != null && !superClassName.equals("java.lang.Object") && !superClassName.startsWith("java.") && !superClassName.startsWith("javax.");
-                        }
+                        // If the super class is from the Azure package and is an implementation type return true
+                        String superClassName = superClass.getQualifiedName();
+                        return superClassName != null && superClassName.startsWith(RuleConfig.AZURE_PACKAGE_NAME) && superClassName.contains(RULE_CONFIG.getListedItemsToCheck().get(0));
                     }
-
                 }
             }
             return false;

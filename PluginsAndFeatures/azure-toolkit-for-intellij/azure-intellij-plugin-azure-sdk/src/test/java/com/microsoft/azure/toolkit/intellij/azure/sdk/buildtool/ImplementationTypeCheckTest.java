@@ -4,7 +4,7 @@ import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.JavaElementVisitor;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiClassType;
-import com.intellij.psi.PsiModifier;
+import com.intellij.psi.PsiIdentifier;
 import com.intellij.psi.PsiVariable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,15 +43,13 @@ public class ImplementationTypeCheckTest {
 
     /**
      * Test cases for the ImplementationTypeVisitor class.
-     * This case is for a standalone concrete class that does not implement any interfaces or extend any classes (except java.lang.Object).
-     * This is flagged because it is a standalone concrete class.
+     * This case is for a class that is an implementation type.
+     * The class is in the implementation package.
+     * The registerProblem method should be called.
      */
     @Test
-    public void testStandaloneConcreteClass() {
-
-        Boolean isInterfaceBoolean = false;  // It's not an interface
-        Boolean isAbstractBoolean = false;   // It's not abstract
-        String classQualifiedName = "com.example.StandaloneClass";  // Arbitrary class name
+    public void testDirectUseOfImplementationType() {
+        String classQualifiedName = "com.azure.data.appconfiguration.implementation.models";
 
         // No interfaces implemented
         PsiClass[] interfaces = new PsiClass[]{};
@@ -62,20 +60,17 @@ public class ImplementationTypeCheckTest {
         String superClassQualifiedName = "java.lang.Object";  // Extends java.lang.Object
 
         int numOfInvocations = 1;
-
-        verifyRegisterProblem(isInterfaceBoolean, isAbstractBoolean, classQualifiedName, interfaces, superClass, superClassQualifiedName, interfaceQualifiedName, numOfInvocations);
+        verifyRegisterProblem(classQualifiedName, interfaces, superClass, superClassQualifiedName, interfaceQualifiedName, numOfInvocations);
     }
 
     /**
-     * Test case for an interface class that a concrete class implements.
-     * This is not flagged because it is correctly used in the variable declaration.
+     * Test cases for the ImplementationTypeVisitor class.
+     * This case is for a class that is not an implementation type.
+     * The registerProblem method should not be called.
      */
     @Test
-    public void testNotConcreteClass() {
-
-        Boolean isInterfaceBoolean = true;  // It's not an interface
-        Boolean isAbstractBoolean = false;   // It's not abstract
-        String classQualifiedName = "com.example.StandaloneClass";  // Arbitrary class name
+    public void testUseOfNonImplementationAzurePackage() {
+        String classQualifiedName = "com.azure.data.appconfiguration.models";
 
         // No interfaces implemented
         PsiClass[] interfaces = new PsiClass[]{};
@@ -86,109 +81,71 @@ public class ImplementationTypeCheckTest {
         String superClassQualifiedName = "java.lang.Object";  // Extends java.lang.Object
 
         int numOfInvocations = 0;
-
-        verifyRegisterProblem(isInterfaceBoolean, isAbstractBoolean, classQualifiedName, interfaces, superClass, superClassQualifiedName, interfaceQualifiedName, numOfInvocations);
+        verifyRegisterProblem(classQualifiedName, interfaces, superClass, superClassQualifiedName, interfaceQualifiedName, numOfInvocations);
     }
 
-
     /**
-     * Test case for a concrete class that implements a custom interface.
-     * This is flagged because, even though the class is part of a hierarchy, the concrete type is used directly.
+     * Test cases for the ImplementationTypeVisitor class.
+     * This case is for a class that implements an implementation type interface.
+     * The registerProblem method should be called.
      */
     @Test
-    public void testConcreteClassImplementingCustomInterfaceWithVariable() {
+    public void testUseOfImplementationTypeInterface() {
+        String classQualifiedName = "com.azure.data.appconfiguration.models";
 
-        Boolean isInterfaceBoolean = false;  // It's not an interface
-        Boolean isAbstractBoolean = false;   // It's not abstract
-        String classQualifiedName = "com.example.CustomClass";  // Arbitrary class name
-
-        // Implements a custom interface
+        // Implements an implementation type interface
         PsiClass interfaceClass = mock(PsiClass.class);
-        String interfaceQualifiedName = "com.example.CustomInterface";
+        String interfaceQualifiedName = "com.azure.data.appconfiguration.implementation.models";
         PsiClass[] interfaces = new PsiClass[]{interfaceClass};
 
-        // Does not extend any class (implicitly extends Object)
+        // Extends Object (implicitly)
         PsiClass superClass = mock(PsiClass.class);
         String superClassQualifiedName = "java.lang.Object";  // Extends java.lang.Object
 
         int numOfInvocations = 1;
-
-        verifyRegisterProblem(isInterfaceBoolean, isAbstractBoolean, classQualifiedName, interfaces, superClass, superClassQualifiedName, interfaceQualifiedName, numOfInvocations);
+        verifyRegisterProblem(classQualifiedName, interfaces, superClass, superClassQualifiedName, interfaceQualifiedName, numOfInvocations);
     }
 
     /**
-     * Test case for a concrete class that implements a Java utility interface.
-     * This is not flagged because it is considered part of the standard Java hierarchy.
+     * Test cases for the ImplementationTypeVisitor class.
+     * This case is for a class that extends an implementation type abstract class.
+     * The registerProblem method should be called.
      */
     @Test
-    public void testConcreteClassImplementingJavaUtilityInterface() {
+    public void testUseOfImplementationTypeAbstractClass() {
+        String classQualifiedName = "com.azure.data.appconfiguration.models";
 
-        Boolean isInterfaceBoolean = false;  // It's not an interface
-        Boolean isAbstractBoolean = false;   // It's not abstract
-        String classQualifiedName = "com.example.SerializableClass";  // Arbitrary class name
+        // Implements an implementation type interface
+        String interfaceQualifiedName = null;
+        PsiClass[] interfaces = new PsiClass[]{};
 
-        // Implements a Java utility interface
-        PsiClass interfaceClass = mock(PsiClass.class);
-        String interfaceQualifiedName = "java.io.Serializable";
-        PsiClass[] interfaces = new PsiClass[]{interfaceClass};
-
-        // Does not extend any class (implicitly extends Object)
+        // Extends Object (implicitly)
         PsiClass superClass = mock(PsiClass.class);
-        String superClassQualifiedName = "java.lang.Object";  // Extends java.lang.Object
+        String superClassQualifiedName = "com.azure.data.appconfiguration.implementation.models";  // Extends java.lang.Object
 
-        int numOfInvocations = 0;
-
-        verifyRegisterProblem(isInterfaceBoolean, isAbstractBoolean, classQualifiedName, interfaces, superClass, superClassQualifiedName, interfaceQualifiedName, numOfInvocations);
+        int numOfInvocations = 1;
+        verifyRegisterProblem(classQualifiedName, interfaces, superClass, superClassQualifiedName, interfaceQualifiedName, numOfInvocations);
     }
 
     /**
-     * Test case for a concrete class that extends a Java utility class.
-     * This is not flagged because it is considered part of the standard Java hierarchy.
+     * Test cases for the ImplementationTypeVisitor class.
+     * This case is for a non-Azure class.
+     * The registerProblem method should not be called.
      */
     @Test
-    public void testConcreteClassExtendingJavaUtil() {
-
-        Boolean isInterfaceBoolean = false;  // It's not an interface
-        Boolean isAbstractBoolean = false;   // It's not abstract
-        String classQualifiedName = "com.example.ArrayListSubclass";  // Arbitrary class name
+    public void testUseOfNonAzurePackage() {
+        String classQualifiedName = "com.nonazure.data.appconfiguration.implementation.models";
 
         // No interfaces implemented
         PsiClass[] interfaces = new PsiClass[]{};
         String interfaceQualifiedName = null;
 
-        // Extends a Java utility class
+        // Extends Object (implicitly)
         PsiClass superClass = mock(PsiClass.class);
-        String superClassQualifiedName = "java.util.ArrayList";  // Extends java.util.ArrayList
+        String superClassQualifiedName = "java.lang.Object";  // Extends java.lang.Object
 
         int numOfInvocations = 0;
-
-        verifyRegisterProblem(isInterfaceBoolean, isAbstractBoolean, classQualifiedName, interfaces, superClass, superClassQualifiedName, interfaceQualifiedName, numOfInvocations);
-    }
-
-    /**
-     * Test case for a concrete class that implements a custom interface and extends a Java utility class.
-     * This is flagged because it is a concrete class that is part of a hierarchy.
-     */
-    @Test
-    public void testConcreteClassImplementingCustomInterfaceAndExtendingJavaUtilityClassFlagged() {
-
-        Boolean isInterfaceBoolean = false;  // It's not an interface
-        Boolean isAbstractBoolean = false;   // It's not abstract
-        String classQualifiedName = "com.example.CustomExtendedClass";  // Arbitrary class name
-
-        // Implements a custom interface
-        PsiClass interfaceClass = mock(PsiClass.class);
-        String interfaceQualifiedName = "com.example.CustomInterface";
-        PsiClass[] interfaces = new PsiClass[]{interfaceClass};
-
-        // Extends a Java utility class
-        PsiClass superClass = mock(PsiClass.class);
-        String superClassQualifiedName = "java.util.ArrayList";  // Extends java.util.ArrayList
-        when(superClass.getQualifiedName()).thenReturn("java.util.ArrayList");
-
-        int numOfInvocations = 1;
-
-        verifyRegisterProblem(isInterfaceBoolean, isAbstractBoolean, classQualifiedName, interfaces, superClass, superClassQualifiedName, interfaceQualifiedName, numOfInvocations);
+        verifyRegisterProblem(classQualifiedName, interfaces, superClass, superClassQualifiedName, interfaceQualifiedName, numOfInvocations);
     }
 
     /**
@@ -203,8 +160,6 @@ public class ImplementationTypeCheckTest {
     /**
      * Helper method to verify registerProblem method.
      *
-     * @param isInterfaceBoolean      True if the class is an interface, false otherwise
-     * @param isAbstractBoolean       True if the class is abstract, false otherwise
      * @param classQualifiedName      Qualified name of the class
      * @param interfaces              Array of interfaces implemented by the class
      * @param superClass              Super class of the class - This is the class that the class extends
@@ -212,21 +167,19 @@ public class ImplementationTypeCheckTest {
      * @param interfaceQualifiedName  Qualified name of the interface - This is the interface that the class implements
      * @param numOfInvocations        Number of times registerProblem method is called
      */
-    private void verifyRegisterProblem(Boolean isInterfaceBoolean, Boolean isAbstractBoolean, String classQualifiedName, PsiClass[] interfaces, PsiClass superClass, String superClassQualifiedName, String interfaceQualifiedName, int numOfInvocations) {
+    private void verifyRegisterProblem(String classQualifiedName, PsiClass[] interfaces, PsiClass superClass, String superClassQualifiedName, String interfaceQualifiedName, int numOfInvocations) {
 
         PsiClassType type = mock(PsiClassType.class);
         PsiClass psiClass = mock(PsiClass.class);
+        PsiIdentifier mockIdentifier = mock(PsiIdentifier.class);
 
         when(mockVariable.getType()).thenReturn(type);
 
-        // isConcreteClass method
+        // isImplementationType method
         when(type.resolve()).thenReturn(psiClass);
-        when(psiClass.isInterface()).thenReturn(isInterfaceBoolean);
-        when(psiClass.hasModifierProperty(PsiModifier.ABSTRACT)).thenReturn(isAbstractBoolean);
-
-        // hasImplementedInterfaces
         when(psiClass.getQualifiedName()).thenReturn(classQualifiedName);
 
+        // ExtendsOrImplementsImplementationType method
         when(psiClass.getInterfaces()).thenReturn(interfaces);
         when(psiClass.getSuperClass()).thenReturn(superClass);
 
@@ -236,8 +189,8 @@ public class ImplementationTypeCheckTest {
             when(interfaces[0].getQualifiedName()).thenReturn(interfaceQualifiedName);
         }
 
+        when(mockVariable.getNameIdentifier()).thenReturn(mockIdentifier);
         mockVisitor.visitVariable(mockVariable);
-
-        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(mockVariable), Mockito.contains("Detected usage of a concrete implementation type. Consider using an interface or an abstract class to promote flexibility and testability."));
+        verify(mockHolder, times(numOfInvocations)).registerProblem(eq(mockIdentifier), Mockito.contains("Detected usage of an implementation type. Implementation types are not intended for public use. Use the publicly available Azure classes instead."));
     }
 }

@@ -160,6 +160,9 @@ class RuleConfigLoader {
                 case "regexPatterns":
                     listedItemsToCheck = getValuesFromJsonReader(reader);
                     break;
+                case "typesToCheck":
+                    listedItemsToCheck = getListFromJsonArray(reader);
+                    break;
                 default:
                     if (fieldName.endsWith("Check")) {
                         // Move to the next token to process the nested object
