@@ -259,4 +259,4 @@ integration, telemetry connectivity, and Azure Toolkit integration.
   that require it. Otherwise, it is not necessary to authenticate non-Azure Open-AI clients.
   Please refer to
   the [KeyCredential Class documentation](https://learn.microsoft.com/java/api/com.azure.core.credential.keycredential?view=azure-java-stable)
-  for more information.
+  for more information. 
