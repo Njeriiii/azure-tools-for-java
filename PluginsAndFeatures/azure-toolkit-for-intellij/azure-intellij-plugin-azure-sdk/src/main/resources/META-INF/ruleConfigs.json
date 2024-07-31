@@ -119,7 +119,7 @@
     "antiPatternMessage": "Endpoint should not be used with KeyCredential for non-Azure OpenAI clients"
   },
   "ImplementationTypeCheck": {
-    "typesToCheck": "implementation",
+    "subPackageName": "implementation",
     "antiPatternMessage": "Detected usage of an implementation type. Implementation types are not intended for public use. Use the publicly available Azure classes instead."
   }
 }

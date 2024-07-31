@@ -160,7 +160,7 @@ class RuleConfigLoader {
                 case "regexPatterns":
                     listedItemsToCheck = getValuesFromJsonReader(reader);
                     break;
-                case "typesToCheck":
+                case "subPackageName":
                     listedItemsToCheck = getListFromJsonArray(reader);
                     break;
                 default:

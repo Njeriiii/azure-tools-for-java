@@ -228,7 +228,7 @@
                 displayName="Implementation Type Check"
                 groupName="Azure SDK"
                 enabledByDefault="true"
-                level="WARNING"
+                level="ERROR"
                 implementationClass="com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.ImplementationTypeCheck">
 
             <class>

@@ -80,7 +80,7 @@ public class ImplementationTypeCheck extends LocalInspectionTool {
                 holder.registerProblem(variable.getNameIdentifier(), RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
 
                 // Check if the type extends or implements an implementation type
-            } else if (ExtendsOrImplementsImplementationType(type) && variable.getNameIdentifier() != null) {
+            } else if (extendsOrImplementsImplementationType(type) && variable.getNameIdentifier() != null) {
                 holder.registerProblem(variable.getNameIdentifier(), RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
             }
         }
@@ -107,7 +107,7 @@ public class ImplementationTypeCheck extends LocalInspectionTool {
          * This method checks if the type is a class that extends or implements an implementation type.
          * It returns true if the type extends or implements an implementation type and false otherwise.
          */
-        private boolean ExtendsOrImplementsImplementationType(PsiType type) {
+        private boolean extendsOrImplementsImplementationType(PsiType type) {
             if (type instanceof PsiClassType) {
                 PsiClass psiClass = ((PsiClassType) type).resolve();
 
