@@ -93,8 +93,9 @@ class CustomTooltipOnHover implements LocalQuickFix {
 
         // Create a JEditorPane for both the recommendation text and the link
         JEditorPane editorPane = new JEditorPane();
-        editorPane.setEditorKit(new HTMLEditorKit());
-        StyleSheet styleSheet = ((HTMLEditorKit) editorPane.getEditorKit()).getStyleSheet();
+        HTMLEditorKit editorKit = new HTMLEditorKit();
+        editorPane.setEditorKit(editorKit);
+        StyleSheet styleSheet = (editorKit).getStyleSheet();
 
         // Get IntelliJ's default editor font
         Font editorFont = EditorColorsManager.getInstance().getGlobalScheme().getFont(EditorFontType.PLAIN);
