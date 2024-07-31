@@ -19,8 +19,8 @@ public class ImplementationTypeCheck extends LocalInspectionTool {
     /**
      * Build the visitor for the inspection. This visitor will be used to traverse the PSI tree.
      *
-     * @param holder The holder for the problems found
-     *@param isOnTheFly Whether the inspection is being run on the fly - This is not used in this implementation, but is required by the interface
+     * @param holder     The holder for the problems found
+     * @param isOnTheFly Whether the inspection is being run on the fly - This is not used in this implementation, but is required by the interface
      * @return The visitor for the inspection
      */
     @NotNull
@@ -99,8 +99,15 @@ public class ImplementationTypeCheck extends LocalInspectionTool {
             if (psiClass == null) {
                 return false;
             }
-            // Check if the class is in the Azure package and if it is an implementation type
-            return psiClass.getQualifiedName().startsWith(RuleConfig.AZURE_PACKAGE_NAME) && psiClass.getQualifiedName().contains(RULE_CONFIG.getListedItemsToCheck().get(0));
+
+            for (String listedItem : RULE_CONFIG.getListedItemsToCheck()) {
+                if (psiClass.getQualifiedName() != null && psiClass.getQualifiedName().contains(listedItem)) {
+
+                    // Check if the class is in the Azure package and if it is an implementation type
+                    return psiClass.getQualifiedName().startsWith(RuleConfig.AZURE_PACKAGE_NAME) && psiClass.getQualifiedName().contains(listedItem);
+                }
+            }
+            return false;
         }
 
         /**
