@@ -20,7 +20,7 @@ import java.awt.Insets;
 import static com.intellij.ui.ColorUtil.toHex;
 
 /**
- * This class is used to create a custom quick fix that shows a tooltip with a recommendation text and a link to the Azure SDK for Java documentation.
+ * This class is used to create a tooltip with a recommendation text and a link to the Azure SDK for Java documentation.
  */
 class CustomTooltipOnHover implements LocalQuickFix {
 
