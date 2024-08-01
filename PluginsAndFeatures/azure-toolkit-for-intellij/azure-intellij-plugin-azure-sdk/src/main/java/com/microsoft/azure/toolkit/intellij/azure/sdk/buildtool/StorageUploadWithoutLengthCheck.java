@@ -11,9 +11,6 @@ import com.intellij.psi.PsiNewExpression;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
-
 /**
  * This class extends the LocalInspectionTool and is used to inspect the usage of Azure Storage upload APIs in the code.
  * It checks if the upload methods are being called without a 'length' parameter of type 'long'.

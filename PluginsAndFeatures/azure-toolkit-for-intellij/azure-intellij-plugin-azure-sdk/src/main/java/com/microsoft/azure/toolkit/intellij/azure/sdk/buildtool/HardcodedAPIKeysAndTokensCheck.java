@@ -8,9 +8,6 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiNewExpression;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
-
 /**
  * This class is a custom inspection tool that checks for hardcoded API keys and tokens in the code.
  * It extends the LocalInspectionTool class and overrides the buildVisitor method to create a visitor for the inspection.
