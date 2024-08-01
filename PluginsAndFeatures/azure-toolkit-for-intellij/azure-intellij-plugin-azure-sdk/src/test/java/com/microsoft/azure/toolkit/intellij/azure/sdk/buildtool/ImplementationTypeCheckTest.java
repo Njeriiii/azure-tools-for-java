@@ -115,7 +115,7 @@ public class ImplementationTypeCheckTest {
     public void testUseOfImplementationTypeAbstractClass() {
         String classQualifiedName = "com.azure.data.appconfiguration.models";
 
-        // Implements an implementation type interface
+        // Does not implement any interface
         String interfaceQualifiedName = null;
         PsiClass[] interfaces = new PsiClass[]{};
 

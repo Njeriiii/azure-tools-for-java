@@ -74,13 +74,14 @@ public class ImplementationTypeCheck extends LocalInspectionTool {
             // Get the type of the variable - This is the type of the variable declaration
             // eg. List<String> myList = new ArrayList<>(); -> type = List<String>
             PsiType type = variable.getType();
+            PsiClass psiClass = ((PsiClassType) type).resolve();
 
             // Check if the type directly used is an implementation type
-            if (isImplementationType(type) && variable.getNameIdentifier() != null) {
+            if (isImplementationType(psiClass) && variable.getNameIdentifier() != null) {
                 holder.registerProblem(variable.getNameIdentifier(), RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
 
                 // Check if the type extends or implements an implementation type
-            } else if (extendsOrImplementsImplementationType(type) && variable.getNameIdentifier() != null) {
+            } else if (extendsOrImplementsImplementationType(psiClass) && variable.getNameIdentifier() != null) {
                 holder.registerProblem(variable.getNameIdentifier(), RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
             }
         }
@@ -89,19 +90,14 @@ public class ImplementationTypeCheck extends LocalInspectionTool {
          * This method checks if the type is a class from the Azure package and if it is an implementation type.
          * It returns true if the type is an implementation type and false otherwise.
          */
-        private boolean isImplementationType(PsiType type) {
-
-            if (!(type instanceof PsiClassType)) {
-                return false;
-            }
-            PsiClass psiClass = ((PsiClassType) type).resolve();
+        private boolean isImplementationType(PsiClass psiClass) {
 
             if (psiClass == null) {
                 return false;
             }
 
             for (String listedItem : RULE_CONFIG.getListedItemsToCheck()) {
-                if (psiClass.getQualifiedName() != null && psiClass.getQualifiedName().contains(listedItem)) {
+                if (psiClass.getQualifiedName() != null) {
 
                     // Check if the class is in the Azure package and if it is an implementation type
                     return psiClass.getQualifiedName().startsWith(RuleConfig.AZURE_PACKAGE_NAME) && psiClass.getQualifiedName().contains(listedItem);
@@ -114,35 +110,28 @@ public class ImplementationTypeCheck extends LocalInspectionTool {
          * This method checks if the type is a class that extends or implements an implementation type.
          * It returns true if the type extends or implements an implementation type and false otherwise.
          */
-        private boolean extendsOrImplementsImplementationType(PsiType type) {
-            if (type instanceof PsiClassType) {
-                PsiClass psiClass = ((PsiClassType) type).resolve();
+        private boolean extendsOrImplementsImplementationType(PsiClass psiClass) {
 
-                if (psiClass != null) {
+            // If the class is null or if it is a Java class, it is not an implementation type nor does it extend or implement one
+            if (psiClass == null || psiClass.getQualifiedName().startsWith("java.")) {
+                return false;
+            }
 
-                    PsiClass[] interfaces = psiClass.getInterfaces();
-                    PsiClass superClass = psiClass.getSuperClass();
+            // Check if the current class is an implementation type
+            if (isImplementationType(psiClass)) {
+                return true;
+            }
 
-                    // Case 1: Class has no implemented interfaces and does not extend any class
-                    if (interfaces.length == 0 && superClass != null && superClass.getQualifiedName().equals("java.lang.Object")) {
-                        return false;
-                    }
-
-                    // Case 2: Class has implemented interfaces or extends a class that is an implementation type
-                    if (interfaces.length > 0 || (superClass != null && !superClass.getQualifiedName().startsWith("java."))) {
-
-                        for (PsiClass iface : interfaces) {
-
-                            // If the interface is from the Azure package and is an implementation type return true
-                            String ifaceName = iface.getQualifiedName();
-                            return ifaceName != null && ifaceName.startsWith(RuleConfig.AZURE_PACKAGE_NAME) && ifaceName.contains(RULE_CONFIG.getListedItemsToCheck().get(0));
-                        }
-
-                        // If the super class is from the Azure package and is an implementation type return true
-                        String superClassName = superClass.getQualifiedName();
-                        return superClassName != null && superClassName.startsWith(RuleConfig.AZURE_PACKAGE_NAME) && superClassName.contains(RULE_CONFIG.getListedItemsToCheck().get(0));
-                    }
+            // Check all direct interfaces
+            for (PsiClass iface : psiClass.getInterfaces()) {
+                if (extendsOrImplementsImplementationType(iface)) {
+                    return true;
                 }
+            }
+            // Check the direct superclass
+            PsiClass superClass = psiClass.getSuperClass();
+            if (superClass != null) {
+                return extendsOrImplementsImplementationType(superClass);
             }
             return false;
         }

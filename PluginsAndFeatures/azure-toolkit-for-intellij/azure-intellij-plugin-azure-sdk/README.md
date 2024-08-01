@@ -267,5 +267,5 @@ integration, telemetry connectivity, and Azure Toolkit integration.
 - **Issue**: Implementation types are internal classes that are not intended for public use. They may change or be
   removed
   in future versions, leading to compatibility issues.
-- **Severity: WARNING**
+- **Severity: ERROR**
 - **Recommendation**: Use the publicly available Azure classes instead.
