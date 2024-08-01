@@ -9,3 +9,7 @@ body {
 .tooltip {
     width: 500px; /* Maximum width for the content */
 }
+
+.inline-links {
+    text-decoration: underline;
+}

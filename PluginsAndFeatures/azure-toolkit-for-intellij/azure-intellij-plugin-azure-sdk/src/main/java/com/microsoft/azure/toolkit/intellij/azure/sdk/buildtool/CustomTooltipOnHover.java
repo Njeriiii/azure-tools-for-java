@@ -83,7 +83,7 @@ class CustomTooltipOnHover implements LocalQuickFix {
         JBColor dynamicTextColor = new JBColor(Gray._50, Gray._176);// Black for light, white for dark theme
 
         // Combine the recommendation text and the link on the same line
-        String htmlContent = "<html><body style='color: " + toHex(dynamicTextColor) + ";'><div class='tooltip' role='tooltip' aria-live='polite'>" + recommendationText + " <a href='" + linkUrl + "' style='text-decoration: underline;'>Refer to Azure SDK for Java documentation</a>" + " for more information on this suggestion. </body></html>";
+        String htmlContent = "<html><body style='color: " + toHex(dynamicTextColor) + ";'>" + "<div class='tooltip' role='tooltip' aria-live='polite'>" + recommendationText + " <a href='" + linkUrl + "' class='inline-links' aria-label='Refer to Azure SDK for Java documentation for more information on this suggestion.'>" + "Refer to Azure SDK for Java documentation" + "</a> for more information on this suggestion." + "</div></body></html>";
 
         // Create a panel for the tooltip
         JBPanel<JBPanel<?>> panel = QuickFixPanelConfigurations.createPanel(htmlContent);
