@@ -2,6 +2,8 @@ package com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool;
 
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.psi.JavaElementVisitor;
 import com.intellij.psi.PsiAssignmentExpression;
 import com.intellij.psi.PsiClass;
@@ -9,6 +11,7 @@ import com.intellij.psi.PsiCodeBlock;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiExpressionStatement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiNewExpression;
@@ -57,6 +60,8 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
         private static final RuleConfig RULE_CONFIG;
         private static final boolean SKIP_WHOLE_RULE;
 
+        PsiVariable associatedVariable = null;
+
         // Load the rule configuration
         static {
             final String ruleName = "StopThenStartOnServiceBusProcessorCheck";
@@ -83,6 +88,8 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
         public void visitElement(@NotNull PsiElement element) {
             super.visitElement(element);
 
+            System.out.println("Start of visitElement");
+
             // check if there's been a new expression
             if (SKIP_WHOLE_RULE) {
                 return;
@@ -92,13 +99,15 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
                 PsiNewExpression newExpression = (PsiNewExpression) element;
                 System.out.println("New Expression: " + newExpression);
 
-                PsiVariable associatedVariable = findAssociatedVariable(newExpression);
-                System.out.println("Associated Variable: " + associatedVariable);
+                PsiVariable tempVariable = findAssociatedVariable(newExpression);
+                System.out.println("Associated Variable: " + tempVariable);
 
-                if (associatedVariable != null && isServiceBusProcessorClient(associatedVariable)) {
+                if (tempVariable != null && isServiceBusProcessorClient(tempVariable)) {
+                    associatedVariable = tempVariable;
                     variableStateMap.put(associatedVariable.hashCode(), false);
                     System.out.println("Associated Variable: " + associatedVariable.getName());
                     System.out.println("AssociatedVariable.hashCode(): " + associatedVariable.hashCode());
+                    System.out.println("Variable State Map: " + variableStateMap);
                 } else {
                     System.out.println("No associated variable found.");
                 }
@@ -112,14 +121,28 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
                 PsiCodeBlock body = method.getBody();
                 System.out.println("Body: " + body);
 
+                boolean stopStartInMethodBody = false;
+
                 if (body != null) {
-                    visitMethodBody(body);  // Start visiting the body elements
+                    visitMethodBody(body, stopStartInMethodBody);  // Start visiting the body elements
+                }
+
+                System.out.println("We are done with the method body");
+                System.out.println("Variable State Map: " + variableStateMap);
+                System.out.println("Associated Variable: " + associatedVariable);
+
+                if (associatedVariable != null) {
+                    variableStateMap.put(associatedVariable.hashCode(), false);
+                    System.out.println("Variable State Map putting back false: " + variableStateMap);
                 }
             }
+            System.out.println("End of visitElement");
         }
 
         // Recursively visit all elements in a method body
-        private void visitMethodBody(@NotNull PsiCodeBlock body) {
+        private void visitMethodBody(@NotNull PsiCodeBlock body, boolean stopStartInMethodBody) {
+
+            System.out.println("stopStartInMethodBody: " + stopStartInMethodBody);
 
             for (PsiElement child : body.getChildren()) {
 
@@ -165,8 +188,10 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
                             System.out.println("Variable State Map: " + variableStateMap);
 
                             if (variableStateMap.containsKey(resolvedElement.hashCode())) {
-                                checkMethodCall(methodCall);
-                                continue;
+                                if (checkMethodCall(methodCall, stopStartInMethodBody)) {
+                                    System.out.println("Registering Problem");
+                                    holder.registerProblem(methodCall, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
+                                }
                             }
                         }
                     }
@@ -177,17 +202,35 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
                     if (resolvedMethod != null) {
                         System.out.println("Resolved Method: " + resolvedMethod);
 
-                        PsiCodeBlock resolvedBody = resolvedMethod.getBody();
-                        System.out.println("Resolved Body: " + resolvedBody);
-                        if (resolvedBody != null) {
-                            visitMethodBody(resolvedBody);  // Recursively visit the resolved method's body
+                        PsiFile containingFile = resolvedMethod.getContainingFile();
+                        if (containingFile != null) {
+                            // Check if the containing file is within the current project
+                            boolean isInCurrentProject = isFileInCurrentProject(containingFile);
+                            System.out.println("Is In Current Project: " + isInCurrentProject);
+
+                            if (isInCurrentProject) {
+                                PsiCodeBlock resolvedBody = resolvedMethod.getBody();
+                                System.out.println("Resolved Body: " + resolvedBody);
+
+                                if (resolvedBody != null) {
+                                    visitMethodBody(resolvedBody, stopStartInMethodBody);  // Recursively visit the resolved method's body
+                                }
+                            }
                         }
                     }
                 }
 
                 // Continue visiting children of the current element
-                child.accept(this);
+//                child.accept(this);
             }
+        }
+
+        // Helper method to check if the file is in the current project
+        private boolean isFileInCurrentProject(PsiFile file) {
+            // Assuming `project` is an instance of com.intellij.openapi.project.Project
+            Project project = file.getProject();
+            System.out.println("Project: " + project);
+            return ProjectRootManager.getInstance(project).getFileIndex().isInContent(file.getVirtualFile());
         }
 
 
@@ -197,9 +240,10 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
          *
          * @param expression The PsiMethodCallExpression to visit
          */
-        private void checkMethodCall(PsiMethodCallExpression expression) {
+        private boolean checkMethodCall(PsiMethodCallExpression expression, boolean stopStartInMethodBody) {
 
             System.out.println("checkMethodCall");
+            System.out.println("stopStartInMethodBody: " + stopStartInMethodBody);
 
             // Check if the method being called is 'stop' or 'start'
             PsiReferenceExpression methodExpression = expression.getMethodExpression();
@@ -210,7 +254,7 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
             System.out.println("Methods to Check: " + RULE_CONFIG.getMethodsToCheck());
 
             if (!(RULE_CONFIG.getMethodsToCheck().contains(methodName))) {
-                return;
+                return stopStartInMethodBody;
             }
 
             // Get the qualifier of the method call - the object on which the method is called
@@ -218,7 +262,7 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
             System.out.println("Qualifier: " + qualifier);
 
             if (!(qualifier instanceof PsiReferenceExpression)) {
-                return;
+                return stopStartInMethodBody;
             }
             PsiElement reference = ((PsiReferenceExpression) qualifier).resolve();
             System.out.println("Reference: " + reference);
@@ -242,12 +286,20 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
                 variableStateMap.put(variable.hashCode(), true); // Mark that stop was called
 
                 // If 'start' is called and 'stop' was called on the variable, register a problem
-            } else if ("start".equals(methodName) && Boolean.TRUE.equals(wasStopCalled)) {
-                holder.registerProblem(methodExpression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
+            } else if ("start".equals(methodName)) {
+                if (wasStopCalled) {
+                    stopStartInMethodBody = true;
+                    System.out.println("Start Method Called");
+                    return stopStartInMethodBody;
+                }
 
-                // Reset the state after reporting the problem
-                variableStateMap.remove(variable);
+//                    && Boolean.TRUE.equals(wasStopCalled)) {
+//                holder.registerProblem(methodExpression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
+//
+//                // Reset the state after reporting the problem
+//                variableStateMap.remove(variable);
             }
+            return false;
         }
 
         /**
@@ -273,7 +325,6 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
             System.out.println("New Expression: " + newExpression);
 
             PsiElement parent = newExpression.getParent();
-            System.out.println("Parent: " + parent);
 
             // Traverse upwards to find a variable declaration or assignment
             while (parent != null) {
@@ -300,9 +351,12 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
                 }
                 // Move up the tree
                 parent = parent.getParent();
-                System.out.println("Parent: " + parent);
             }
             return null; // No associated variable found
         }
     }
 }
+
+
+/// NOTES
+// Check within the same method body for both start AND stop -- if there's only one, don't track it
