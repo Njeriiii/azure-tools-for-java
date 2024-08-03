@@ -6,7 +6,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.psi.JavaElementVisitor;
 import com.intellij.psi.PsiAssignmentExpression;
-import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiCodeBlock;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiExpression;
@@ -15,7 +14,6 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiNewExpression;
-import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.PsiVariable;
@@ -75,162 +73,136 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
         /**
          * This constructor initializes the Visitor with the ProblemsHolder
          *
-         * @param holder The ProblemsHolder to register the problem with
+         * @param holder The ProblemsHolder to register the problem with when found
          */
         StopThenStartOnServiceBusProcessorVisitor(ProblemsHolder holder) {
             this.holder = holder;
         }
 
         /**
-         * @param element
+         * This method visits the PsiElement and checks if it's a declaration of a ServiceBusProcessorClient object.
+         * If it is, the associated variable is stored in the variableStateMap.
+         * The method also checks the body of the method for method calls and their definitions.
+         * If a stop method is called on a ServiceBusProcessorClient object, followed by a start method call on the same object, a problem is registered with the ProblemsHolder.
+         * The method also resets the associated variable to false after visiting the method body once the recursive calls are done.
+         *
+         * @param element The PsiElement to visit
          */
         @Override
         public void visitElement(@NotNull PsiElement element) {
             super.visitElement(element);
-
-            System.out.println("Start of visitElement");
 
             // check if there's been a new expression
             if (SKIP_WHOLE_RULE) {
                 return;
             }
 
+            // Check if the element is a declaration of a ServiceBusProcessorClient object
             if (element instanceof PsiNewExpression) {
                 PsiNewExpression newExpression = (PsiNewExpression) element;
-                System.out.println("New Expression: " + newExpression);
 
                 PsiVariable tempVariable = findAssociatedVariable(newExpression);
-                System.out.println("Associated Variable: " + tempVariable);
 
                 if (tempVariable != null && isServiceBusProcessorClient(tempVariable)) {
                     associatedVariable = tempVariable;
                     variableStateMap.put(associatedVariable.hashCode(), false);
-                    System.out.println("Associated Variable: " + associatedVariable.getName());
-                    System.out.println("AssociatedVariable.hashCode(): " + associatedVariable.hashCode());
-                    System.out.println("Variable State Map: " + variableStateMap);
-                } else {
-                    System.out.println("No associated variable found.");
                 }
             }
 
-            // if a method is found, check its body
-            if (element instanceof PsiMethod) {
+
+            // Check the body of the method for method calls and their definitions
+            if (element instanceof PsiMethod && associatedVariable != null) {
                 PsiMethod method = (PsiMethod) element;
-                System.out.println("Method: " + method);
-
                 PsiCodeBlock body = method.getBody();
-                System.out.println("Body: " + body);
-
-                boolean stopStartInMethodBody = false;
 
                 if (body != null) {
-                    visitMethodBody(body, stopStartInMethodBody);  // Start visiting the body elements
+
+                    // Start visiting the body elements
+                    visitMethodBody(body);
                 }
 
-                System.out.println("We are done with the method body");
-                System.out.println("Variable State Map: " + variableStateMap);
-                System.out.println("Associated Variable: " + associatedVariable);
-
+                // Reset the associated variable to false after visiting the method body
                 if (associatedVariable != null) {
                     variableStateMap.put(associatedVariable.hashCode(), false);
-                    System.out.println("Variable State Map putting back false: " + variableStateMap);
                 }
             }
-            System.out.println("End of visitElement");
         }
 
-        // Recursively visit all elements in a method body
-        private void visitMethodBody(@NotNull PsiCodeBlock body, boolean stopStartInMethodBody) {
+        /**
+         * This method recursively visits all method calls and their definitions in the PsiCodeBlock.
+         * It checks if a stop method is called on a ServiceBusProcessorClient object, followed by a start method call on the same object.
+         * If this is the case, a problem is registered with the ProblemsHolder.
+         *
+         * @param body The PsiCodeBlock to visit
+         */
+        private void visitMethodBody(@NotNull PsiCodeBlock body) {
 
-            System.out.println("stopStartInMethodBody: " + stopStartInMethodBody);
-
+            // Iterate over the children of the method body to find method calls
             for (PsiElement child : body.getChildren()) {
 
-                System.out.println("Child: " + child);
+                // Only process expression statements - they are Java statements that end in a semicolon
+                if (!(child instanceof PsiExpressionStatement)) {
+                    continue;
+                }
 
-                // If the child is a method call, resolve it
-                if (child instanceof PsiExpressionStatement) {
+                // Get the expression from the statement
+                PsiExpression expression = ((PsiExpressionStatement) child).getExpression();
 
-                    System.out.println("Expression Statement: " + child);
+                // Only process method calls
+                if (!(expression instanceof PsiMethodCallExpression)) {
+                    continue;
+                }
 
-                    PsiExpression expression = ((PsiExpressionStatement) child).getExpression();
-                    System.out.println("Expression: " + expression);
+                // Handle the method call
+                PsiMethodCallExpression methodCall = (PsiMethodCallExpression) expression;
 
-                    if (!(expression instanceof PsiMethodCallExpression)) {
-                        continue;
-                    }
+                // check the element being called on -- if it's a variable, check if it's the one we're tracking
+                PsiElement element = methodCall.getMethodExpression().getQualifierExpression();
 
-                    // Handle the method call
-                    PsiMethodCallExpression methodCall = (PsiMethodCallExpression) expression;
-                    System.out.println("Method Call: " + methodCall);
+                if (element instanceof PsiReferenceExpression) {
 
-                    // check the element being called on
-                    PsiElement element = methodCall.getMethodExpression().getQualifierExpression();
-                    System.out.println("Element: " + element);
+                    PsiReferenceExpression reference = (PsiReferenceExpression) element;
+                    PsiElement resolvedElement = reference.resolve();
 
-                    if (element instanceof PsiReferenceExpression) {
-                        PsiReferenceExpression reference = (PsiReferenceExpression) element;
-                        System.out.println("Reference: " + reference);
+                    // Check if the resolved element is a variable
+                    if ((resolvedElement instanceof PsiVariable)) {
+                        PsiVariable variable = (PsiVariable) resolvedElement;
 
-                        PsiElement resolvedElement = reference.resolve();
-                        System.out.println("Resolved Element: " + resolvedElement);
-                        System.out.println("resolvedElement.hashCode(): " + resolvedElement.hashCode());
+                        if (variableStateMap.containsKey(resolvedElement.hashCode())) {
 
-                        // Check if the resolved element is a variable
-                        if ((resolvedElement instanceof PsiVariable)) {
-                            PsiVariable variable = (PsiVariable) resolvedElement;
-                            System.out.println("Variable: " + variable);
-                            System.out.println("Variable Name: " + variable.getName());
-                            System.out.println("Variable Type: " + variable.getType());
-                            System.out.println("Variable getNameIdentifier: " + variable.getNameIdentifier());
-                            System.out.println("Variable getParent: " + variable.getParent());
-                            System.out.println("Variable getIdentifyingElement: " + variable.getIdentifyingElement());
-                            System.out.println("Variable State Map: " + variableStateMap);
-
-                            if (variableStateMap.containsKey(resolvedElement.hashCode())) {
-                                if (checkMethodCall(methodCall, stopStartInMethodBody)) {
-                                    System.out.println("Registering Problem");
-                                    holder.registerProblem(methodCall, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
-                                }
+                            // Check the API calls on the variable we're tracking for a stop then start
+                            if (checkMethodCall(methodCall)) {
+                                System.out.println("methodCall: " + methodCall);
+                                System.out.println("Registering Problem: " + methodCall.getText());
+                                holder.registerProblem(methodCall, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
+                                return;
                             }
-                        }
-                    }
 
-                    // Resolve the method call to its method definition
-                    PsiMethod resolvedMethod = methodCall.resolveMethod();
-
-                    if (resolvedMethod != null) {
-                        System.out.println("Resolved Method: " + resolvedMethod);
-
-                        PsiFile containingFile = resolvedMethod.getContainingFile();
-                        if (containingFile != null) {
-                            // Check if the containing file is within the current project
-                            boolean isInCurrentProject = isFileInCurrentProject(containingFile);
-                            System.out.println("Is In Current Project: " + isInCurrentProject);
-
-                            if (isInCurrentProject) {
-                                PsiCodeBlock resolvedBody = resolvedMethod.getBody();
-                                System.out.println("Resolved Body: " + resolvedBody);
-
-                                if (resolvedBody != null) {
-                                    visitMethodBody(resolvedBody, stopStartInMethodBody);  // Recursively visit the resolved method's body
-                                }
-                            }
                         }
                     }
                 }
 
-                // Continue visiting children of the current element
-//                child.accept(this);
-            }
-        }
+                // Resolve the method call to its method definition
+                PsiMethod resolvedMethod = methodCall.resolveMethod();
 
-        // Helper method to check if the file is in the current project
-        private boolean isFileInCurrentProject(PsiFile file) {
-            // Assuming `project` is an instance of com.intellij.openapi.project.Project
-            Project project = file.getProject();
-            System.out.println("Project: " + project);
-            return ProjectRootManager.getInstance(project).getFileIndex().isInContent(file.getVirtualFile());
+                if (resolvedMethod == null) {
+                    continue;
+                }
+
+                PsiFile containingFile = resolvedMethod.getContainingFile();
+                if (containingFile == null) {
+                    continue;
+                }
+
+                // Check if the containing file is within the current project
+                boolean isInCurrentProject = isFileInCurrentProject(containingFile);
+                if (isInCurrentProject) {
+                    PsiCodeBlock resolvedBody = resolvedMethod.getBody();
+                    if (resolvedBody != null) {
+                        visitMethodBody(resolvedBody);  // Recursively visit the resolved method's body
+                    }
+                }
+            }
         }
 
 
@@ -240,64 +212,41 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
          *
          * @param expression The PsiMethodCallExpression to visit
          */
-        private boolean checkMethodCall(PsiMethodCallExpression expression, boolean stopStartInMethodBody) {
-
-            System.out.println("checkMethodCall");
-            System.out.println("stopStartInMethodBody: " + stopStartInMethodBody);
+        private boolean checkMethodCall(PsiMethodCallExpression expression) {
 
             // Check if the method being called is 'stop' or 'start'
             PsiReferenceExpression methodExpression = expression.getMethodExpression();
             String methodName = methodExpression.getReferenceName();
 
-            System.out.println("Method Name: " + methodName);
-
-            System.out.println("Methods to Check: " + RULE_CONFIG.getMethodsToCheck());
-
             if (!(RULE_CONFIG.getMethodsToCheck().contains(methodName))) {
-                return stopStartInMethodBody;
+                return false;
             }
 
             // Get the qualifier of the method call - the object on which the method is called
             PsiExpression qualifier = methodExpression.getQualifierExpression();
-            System.out.println("Qualifier: " + qualifier);
 
             if (!(qualifier instanceof PsiReferenceExpression)) {
-                return stopStartInMethodBody;
+                return false;
             }
             PsiElement reference = ((PsiReferenceExpression) qualifier).resolve();
-            System.out.println("Reference: " + reference);
 
-//            if (!(reference instanceof PsiVariable)) {
-//                return;
-//            }
+            if (!(reference instanceof PsiVariable)) {
+                return false;
+            }
 
             // Get the variable that the method is called on
             PsiVariable variable = (PsiVariable) reference;
-            System.out.println("VariableInCheckMethod: " + variable);
 
             // Boolean indicating if stop was called on the variable
             Boolean wasStopCalled = variableStateMap.get(variable.hashCode());
-            System.out.println("Was Stop Called: " + wasStopCalled);
 
             // If 'stop' is called, mark that 'stop' was called on the variable
             if ("stop".equals(methodName)) {
-                System.out.println("Stop Method Called");
-                System.out.println("Variable Hash Code: " + variable.hashCode());
                 variableStateMap.put(variable.hashCode(), true); // Mark that stop was called
 
                 // If 'start' is called and 'stop' was called on the variable, register a problem
             } else if ("start".equals(methodName)) {
-                if (wasStopCalled) {
-                    stopStartInMethodBody = true;
-                    System.out.println("Start Method Called");
-                    return stopStartInMethodBody;
-                }
-
-//                    && Boolean.TRUE.equals(wasStopCalled)) {
-//                holder.registerProblem(methodExpression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
-//
-//                // Reset the state after reporting the problem
-//                variableStateMap.remove(variable);
+                return wasStopCalled;
             }
             return false;
         }
@@ -316,33 +265,35 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
         }
 
         /**
-         * Finds the variable associated with a PsiNewExpression.
+         * This method finds the variable associated with a PsiNewExpression.
          *
          * @param newExpression The PsiNewExpression instance.
          * @return The associated PsiVariable or null if not found.
          */
         public PsiVariable findAssociatedVariable(PsiNewExpression newExpression) {
-            System.out.println("New Expression: " + newExpression);
 
+            // Get the parent of the new expression -- the variable declaration or assignment
             PsiElement parent = newExpression.getParent();
 
             // Traverse upwards to find a variable declaration or assignment
             while (parent != null) {
+
+                //I If the parent is a variable declaration, return the variable
                 if (parent instanceof PsiVariable) {
                     return (PsiVariable) parent; // Direct variable initialization
+
+                    // Get the AssignmentExpression parent of the variable declaration
                 } else if (parent instanceof PsiAssignmentExpression) {
                     PsiAssignmentExpression assignmentExpression = (PsiAssignmentExpression) parent;
-                    System.out.println("Assignment Expression: " + assignmentExpression);
 
+                    // Get the left expression of the assignment
                     PsiExpression lhs = assignmentExpression.getLExpression();
-                    System.out.println("LHS: " + lhs);
 
+                    // If the left expression is a reference expression, resolve it to get the variable associated with the assignment
                     if (lhs instanceof PsiReferenceExpression) {
                         PsiReferenceExpression referenceExpression = (PsiReferenceExpression) lhs;
-                        System.out.println("Reference Expression: " + referenceExpression);
 
                         PsiElement resolvedElement = referenceExpression.resolve();
-                        System.out.println("Resolved Element: " + resolvedElement);
 
                         if (resolvedElement instanceof PsiVariable) {
                             return (PsiVariable) resolvedElement; // Variable in assignment
@@ -354,9 +305,18 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
             }
             return null; // No associated variable found
         }
+
+        /**
+         * Helper method to check if the file is in the current project.
+         * It's used to check if the method call is in the current project (i.e defined by the user and not a library).
+         *
+         * @param file The PsiFile to check
+         * @return A boolean indicating if the file is in the current project
+         */
+        private boolean isFileInCurrentProject(PsiFile file) {
+            // Assuming `project` is an instance of com.intellij.openapi.project.Project
+            Project project = file.getProject();
+            return ProjectRootManager.getInstance(project).getFileIndex().isInContent(file.getVirtualFile());
+        }
     }
 }
-
-
-/// NOTES
-// Check within the same method body for both start AND stop -- if there's only one, don't track it
