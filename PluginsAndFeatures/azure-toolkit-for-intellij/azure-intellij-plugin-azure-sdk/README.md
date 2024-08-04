@@ -301,3 +301,13 @@ integration, telemetry connectivity, and Azure Toolkit integration.
   to
   the [Troubleshoot dependency version conflicts documentation](https://learn.microsoft.com/en-us/azure/developer/java/sdk/troubleshooting-dependency-version-conflict)
   for additional information on resolving dependency version conflicts.
+
+
+17. ## Using Implementation Types instead of Publicly Available Azure Classes
+
+**Anti-pattern**: Using implementation types instead of publicly available Azure classes.
+- **Issue**: Implementation types are internal classes that are not intended for public use. They may change or be
+  removed
+  in future versions, leading to compatibility issues.
+- **Severity: ERROR**
+- **Recommendation**: Use the publicly available Azure classes instead.

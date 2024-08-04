@@ -261,5 +261,19 @@
                 com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.IncompatibleDependencyCheck
             </class>
         </localInspection>
+
+        <localInspection
+                language="JAVA"
+                shortName="ImplementationTypeCheck"
+                displayName="Implementation Type Check"
+                groupName="Azure SDK"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.ImplementationTypeCheck">
+
+            <class>
+                com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.ImplementationTypeCheck
+            </class>
+        </localInspection>
     </extensions>
 </idea-plugin>
