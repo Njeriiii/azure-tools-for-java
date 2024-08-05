@@ -5,11 +5,13 @@ import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.JavaElementVisitor;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiExpression;
+import com.intellij.psi.PsiIdentifier;
 import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiNewExpression;
 import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.PsiVariable;
+import com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.replaceaction.ReplaceElementQuickFix;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -89,7 +91,15 @@ public class EndpointOnNonAzureOpenAIAuthCheck extends LocalInspectionTool {
                 // Using KeyCredential indicates authentication of a non-Azure OpenAI client
                 // If the endpoint method is used with KeyCredential for non-Azure OpenAI clients, a warning is registered
                 if (isUsingKeyCredential(expression)) {
-                    holder.registerProblem(expression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
+
+                    // Get the endpoint method identifier and the qualifier expression
+                    PsiIdentifier endpointMethod = (PsiIdentifier) methodExpression.getReferenceNameElement();
+                    PsiExpression qualifier = expression.getMethodExpression().getQualifierExpression();
+
+                    if (endpointMethod == null || qualifier == null) {
+                        return;
+                    }
+                    holder.registerProblem(endpointMethod, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), new ReplaceElementQuickFix(expression, qualifier.getText()));
                 }
             }
         }
@@ -145,6 +155,10 @@ public class EndpointOnNonAzureOpenAIAuthCheck extends LocalInspectionTool {
 
                 // Cast the element to a new expression
                 PsiNewExpression newExpression = (PsiNewExpression) expression;
+
+                if (newExpression.getClassReference() == null) {
+                    return false;
+                }
 
                 // Get the class reference name from the new expression
                 String classReference = newExpression.getClassReference().getReferenceName();

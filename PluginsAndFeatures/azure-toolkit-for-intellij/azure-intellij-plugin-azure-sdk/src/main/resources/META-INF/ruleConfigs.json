@@ -13,7 +13,8 @@
       "ServiceBusReceiverAsyncClient",
       "ServiceBusProcessorClient"
     ],
-    "antiPatternMessage": "Auto-complete enabled by default. Use the disableAutoComplete() API call to prevent automatic message completion."
+    "antiPatternMessage": "Auto-complete enabled by default. Use the disableAutoComplete() API call to prevent automatic message completion.",
+    "addition": "disableAutoComplete"
   },
   "DynamicClientCreationCheck": {
     "methodsToCheck": [
@@ -61,17 +62,20 @@
     },
     "GetCompletionsInChatApplicationsCheck": {
       "methodsToCheck": "getCompletions",
-      "antiPatternMessage": "getCompletions API detected. Use the getChatCompletions API instead."
+      "antiPatternMessage": "getCompletions API detected. Use the getChatCompletions API instead.",
+      "replacement": "getChatCompletions"
     }
   },
   "DetectDiscouragedClientCheck": {
     "ServiceBusReceiverAsyncClientCheck": {
       "clientsToCheck": "ServiceBusReceiverAsyncClient",
-      "antiPatternMessage": "Use of ServiceBusReceiverAsyncClient detected. Use ServiceBusProcessorClient instead."
+      "antiPatternMessage": "Use of ServiceBusReceiverAsyncClient detected. Use ServiceBusProcessorClient instead.",
+      "replacement": "ServiceBusProcessorClient"
     },
     "EventHubConsumerAsyncClientCheck": {
       "clientsToCheck": "EventHubConsumerAsyncClient",
-      "antiPatternMessage": "Use of EventHubConsumerAsyncClient detected. Use EventProcessorClient instead which provides a higher-level abstraction that simplifies event processing, making it the preferred choice for most developers."
+      "antiPatternMessage": "Use of EventHubConsumerAsyncClient detected. Use EventProcessorClient instead which provides a higher-level abstraction that simplifies event processing, making it the preferred choice for most developers.",
+      "replacement": "EventProcessorClient"
     }
   },
   "SingleOperationInLoopCheck": {

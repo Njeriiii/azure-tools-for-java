@@ -4,6 +4,7 @@ import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.JavaElementVisitor;
 import com.intellij.psi.PsiTypeElement;
+import com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.replaceaction.ReplaceElementQuickFix;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -18,9 +19,6 @@ public class DetectDiscouragedClientCheck extends LocalInspectionTool {
     /**
      * This method builds a visitor to check for the discouraged client name in the code.
      * If the client name matches the discouraged client, a problem is registered with the suggestion message.
-     *
-     * @param holder     - the ProblemsHolder object to register the problem
-     * @param isOnTheFly - whether the inspection is on the fly - not used in this implementation but required by the parent class
      */
     @NotNull
     @Override
@@ -81,7 +79,8 @@ public class DetectDiscouragedClientCheck extends LocalInspectionTool {
                 }
 
                 // Register a problem if the client used matches a discouraged client
-                holder.registerProblem(element, RULE_CONFIG.getAntiPatternMessageMap().get(elementType));
+                holder.registerProblem(element, RULE_CONFIG.getAntiPatternMessageMap().get(elementType),
+                        new ReplaceElementQuickFix(element, RULE_CONFIG.getReplacementMap().get(elementType)));
             }
         }
     }

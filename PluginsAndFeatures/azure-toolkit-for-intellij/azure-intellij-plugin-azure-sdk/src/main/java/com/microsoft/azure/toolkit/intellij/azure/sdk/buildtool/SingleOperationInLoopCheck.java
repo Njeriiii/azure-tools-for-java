@@ -20,6 +20,7 @@ import com.intellij.psi.PsiVariable;
 import com.intellij.psi.PsiWhileStatement;
 import com.intellij.psi.util.PsiTreeUtil;
 
+import com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.replaceaction.ReplaceElementQuickFix;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -170,12 +171,12 @@ public class SingleOperationInLoopCheck extends LocalInspectionTool {
 
                 // Check if the statement is an expression statement and is an Azure client operation
                 if (statement instanceof PsiExpressionStatement) {
-                    isExpressionAzureClientOperation(statement);
+                    isExpressionAzureClientOperation(statement, loopStatement);
                 }
 
                 // Check if the statement is a declaration statement and is an Azure client operation
                 if (statement instanceof PsiDeclarationStatement) {
-                    isDeclarationAzureClientOperation((PsiDeclarationStatement) statement);
+                    isDeclarationAzureClientOperation((PsiDeclarationStatement) statement, loopStatement);
                 }
             }
             return true;
@@ -204,7 +205,7 @@ public class SingleOperationInLoopCheck extends LocalInspectionTool {
          *
          * @param statement The statement to check
          */
-        private void isExpressionAzureClientOperation(PsiStatement statement) {
+        private void isExpressionAzureClientOperation(PsiStatement statement, PsiStatement loopStatement) {
 
             // Get the expression from the statement
             PsiExpression expression = ((PsiExpressionStatement) statement).getExpression();
@@ -213,9 +214,12 @@ public class SingleOperationInLoopCheck extends LocalInspectionTool {
                 // Check if the expression is an Azure client operation
                 if (isAzureTextAnalyticsClientOperation((PsiMethodCallExpression) expression)) {
 
+                    // The qualifier is the variable that the method is called on
+                    PsiElement qualifier = ((PsiMethodCallExpression) expression).getMethodExpression().getQualifier();
+
                     // get the method name
                     String methodName = ((PsiMethodCallExpression) expression).getMethodExpression().getReferenceName();
-                    holder.registerProblem(expression, (RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage") + methodName + "Batch"));
+                    holder.registerProblem(expression, (RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage") + methodName + "Batch"), new ReplaceElementQuickFix(loopStatement, qualifier.getText() + "." + methodName + "Batch()"));
                 }
             }
         }
@@ -225,7 +229,7 @@ public class SingleOperationInLoopCheck extends LocalInspectionTool {
          *
          * @param statement The declaration statement to check
          */
-        private void isDeclarationAzureClientOperation(PsiDeclarationStatement statement) {
+        private void isDeclarationAzureClientOperation(PsiDeclarationStatement statement, PsiStatement loopStatement) {
 
             // getDeclaredElements() returns the variables declared in the statement
             for (PsiElement element : statement.getDeclaredElements()) {
@@ -241,9 +245,13 @@ public class SingleOperationInLoopCheck extends LocalInspectionTool {
                 }
                 // Check if the initializer is an Azure client operation
                 if (isAzureTextAnalyticsClientOperation((PsiMethodCallExpression) initializer)) {
+
+                    // The qualifier is the variable that the method is called on
+                    PsiElement qualifier = ((PsiMethodCallExpression) initializer).getMethodExpression().getQualifier();
+
                     // get the method name
                     String methodName = ((PsiMethodCallExpression) initializer).getMethodExpression().getReferenceName();
-                    holder.registerProblem(initializer, (RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage") + methodName + "Batch"));
+                    holder.registerProblem(initializer, (RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage") + methodName + "Batch"), new ReplaceElementQuickFix(loopStatement, qualifier.getText() + "." + methodName + "Batch()"));
                 }
             }
         }

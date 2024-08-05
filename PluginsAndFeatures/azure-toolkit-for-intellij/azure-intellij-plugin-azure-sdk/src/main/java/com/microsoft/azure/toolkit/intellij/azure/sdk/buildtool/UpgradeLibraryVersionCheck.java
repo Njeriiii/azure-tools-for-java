@@ -5,6 +5,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.xml.XmlFile;
+import com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.replaceaction.ReplaceElementQuickFix;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -63,7 +64,11 @@ public class UpgradeLibraryVersionCheck extends AbstractLibraryVersionCheck {
 
         // Flag the version if the minor version is different from the recommended version
         if (!currentMinor.equals(recommendedVersion)) {
-            holder.registerProblem(versionTag, getFormattedMessage(fullName, recommendedVersion, UpgradeLibraryVersionVisitor.RULE_CONFIG));
+
+            String replacementTagText = "<version>" + recommendedVersion + ".x</version>";
+
+            holder.registerProblem(versionTag, getFormattedMessage(fullName, recommendedVersion, UpgradeLibraryVersionVisitor.RULE_CONFIG),
+                    new ReplaceElementQuickFix(versionTag, replacementTagText));
         }
     }
 

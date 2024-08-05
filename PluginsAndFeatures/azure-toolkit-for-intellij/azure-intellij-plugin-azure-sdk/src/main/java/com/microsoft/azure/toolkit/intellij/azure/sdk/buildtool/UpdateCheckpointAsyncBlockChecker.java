@@ -3,6 +3,7 @@ package com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.JavaElementVisitor;
 import com.intellij.psi.PsiMethodCallExpression;
+import com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.replaceaction.ReplaceElementQuickFix;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -86,7 +87,7 @@ public class UpdateCheckpointAsyncBlockChecker extends AbstractUpdateCheckpointA
                 // Check if the following method is not `block` or `block_with_timeout` and
                 // Check if the updateCheckpointAsync() method call is called on an EventBatchContext object
                 if ((followingMethod == null || !RULE_CONFIG.getMethodsToCheck().contains(followingMethod)) && isCalledOnEventBatchContext(expression)) {
-                    holder.registerProblem(expression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
+                    holder.registerProblem(expression, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"), new ReplaceElementQuickFix(expression, expression.getText() + "block()"));
                 }
             }
         }
