@@ -157,8 +157,14 @@ class RuleConfigLoader {
                 case "servicesToCheck":
                     servicesToCheck = getListFromJsonArray(reader);
                     break;
+                case "typesToCheck":
+                    listedItemsToCheck = getListFromJsonArray(reader);
+                    break;
                 case "regexPatterns":
                     listedItemsToCheck = getValuesFromJsonReader(reader);
+                    break;
+                case "url":
+                    listedItemsToCheck = getListFromJsonArray(reader);
                     break;
                 default:
                     if (fieldName.endsWith("Check")) {

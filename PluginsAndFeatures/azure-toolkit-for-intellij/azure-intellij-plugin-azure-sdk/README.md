@@ -248,7 +248,62 @@ integration, telemetry connectivity, and Azure Toolkit integration.
   the [QueryTimeInterval Class documentation](https://learn.microsoft.com/java/api/com.azure.monitor.query.models.querytimeinterval?view=azure-java-stable)
   for additional information.
 
-13. #### Calling 'stop' then 'start' APIs on a ServiceBusProcessor Client
+13. #### Authenticating a Non-Azure OpenAI Client with KeyCredential
+
+- **Anti-pattern**: Assigning the endpoint value when creating a Non-Azure OpenAI client using the KeyCredential in
+  .credential(KeyCredential).
+- **Issue**: KeyCredential is the only required parameter in `.credential(KeyCredential)` for authenticating requests to
+  non-Azure OpenAI APIs.
+- **Severity: WARNING**
+- **Recommendation**: Omit Endpoint: Only specify the endpoint parameter if you are working with Azure OpenAI services
+  that require it. Otherwise, it is not necessary to authenticate non-Azure Open-AI clients.
+  Please refer to
+  the [KeyCredential Class documentation](https://learn.microsoft.com/java/api/com.azure.core.credential.keycredential?view=azure-java-stable)
+  for more information.
+
+14. #### Use sync client operation if calling blocking calls on asynchronous operations of an Azure asynchronous client.
+
+- **Anti-Pattern**: Calling blocking calls on asynchronous operations of an Azure asynchronous client. This practice
+  turns an asynchronous operation into a synchronous
+  one.
+- **Issue**: Blocking calls go against the non-blocking nature of reactive streams.
+  It can lead to performance issues because it blocks one of the few available threads.
+  In reactive applications, avoiding blocking operations is crucial for scalability and responsiveness.
+- **Severity Level: WARNING**
+- **Recommendation**: If you find yourself frequently using blocking calls in your code, consider switching to the sync
+  client.
+  The sync client performs operations synchronously without requiring locking calls.
+  Using the sync client can make your code more straightforward and easier to understand.
+
+15. #### Upgrading library versions if versions in use known to have performance or reliability issues
+
+- **Anti-pattern**: Using library versions known to have performance or reliability issues.
+- **Issue**: Using outdated library versions can lead to performance bottlenecks, security vulnerabilities, and
+  compatibility
+  issues.
+- **Severity: WARNING**
+- **Recommendation**: Upgrade to the Latest Minor Version. It's recommended to upgrade to the latest minor version of
+  the
+  library to benefit from performance improvements, bug fixes, and security patches. Importantly, if you encounter any
+  issues while using Service Bus Clients, you should first attempt to solve them by upgrading to the latest version of
+  the Service Bus SDK. Please refer to
+  the [ServiceBus Azure SDK Java documentation](https://learn.microsoft.com/azure/developer/java/sdk/troubleshooting-messaging-service-bus-overview#upgrade-to-715x-or-latest)
+  for more information on the latest version of the Service Bus SDK.
+
+16. #### Using Incompatible Versions of Dependencies
+
+- **Anti-pattern**: Using incompatible versions of dependencies in the project.
+- **Issue**: Incompatible versions of dependencies can lead to runtime errors, classpath conflicts, and unexpected
+  behavior.
+- **Severity: WARNING**
+- **Recommendation**: Use a consistent version of dependencies across the project. It's recommended to use a consistent
+  version of dependencies across the project to avoid compatibility issues and ensure smooth integration. Please refer
+  to
+  the [Troubleshoot dependency version conflicts documentation](https://learn.microsoft.com/en-us/azure/developer/java/sdk/troubleshooting-dependency-version-conflict)
+  for additional information on resolving dependency version conflicts.
+
+
+17. #### Calling 'stop' then 'start' APIs on a ServiceBusProcessor Client
 
 - **Anti-pattern**: Calling `stop()` followed by `start()` on a `ServiceBusProcessorClient` instance.
 - **Issue**: Calling `stop()` followed by `start()` on a `ServiceBusProcessorClient` involves significant complexity and

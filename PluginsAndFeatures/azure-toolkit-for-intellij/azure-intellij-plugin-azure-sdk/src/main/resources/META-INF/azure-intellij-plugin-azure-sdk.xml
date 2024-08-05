@@ -210,6 +210,60 @@
 
         <localInspection
                 language="JAVA"
+                shortName="UseOfBlockOnAsyncClientsCheck"
+                displayName="Use Of Block On Async Clients Check"
+                groupName="Azure SDK Rules"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.UseOfBlockOnAsyncClientsCheck">
+
+        <class>
+            com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.UseOfBlockOnAsyncClientsCheck
+        </class>
+        </localInspection>
+
+        <localInspection
+                language="JAVA"
+                shortName="EndpointOnNonAzureOpenAIAuthCheck"
+                displayName="Endpoint On Non-Azure OpenAI Authentication Check"
+                groupName="Azure SDK"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.EndpointOnNonAzureOpenAIAuthCheck">
+
+            <class>
+                com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.EndpointOnNonAzureOpenAIAuthCheck
+            </class>
+        </localInspection>
+
+        <localInspection
+                language="XML"
+                shortName="UpgradeLibraryVersionCheck"
+                displayName="Upgrade Library Version Check"
+                groupName="Azure SDK Rules"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.UpgradeLibraryVersionCheck">
+            <class>
+                com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.UpgradeLibraryVersionCheck
+            </class>
+        </localInspection>
+
+        <localInspection
+                language="XML"
+                shortName="IncompatibleDependencyCheck"
+                displayName="Incompatible Dependency Check"
+                groupName="Azure SDK Rules"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.IncompatibleDependencyCheck">
+            <class>
+                com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.IncompatibleDependencyCheck
+            </class>
+        </localInspection>
+
+        <localInspection
+                language="JAVA"
                 shortName="StopThenStartOnServiceBusProcessorCheck"
                 displayName="Stop Then Start On ServiceBusProcessor Check"
                 groupName="Azure SDK Rules"
