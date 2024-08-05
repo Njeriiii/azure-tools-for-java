@@ -301,3 +301,14 @@ integration, telemetry connectivity, and Azure Toolkit integration.
   to
   the [Troubleshoot dependency version conflicts documentation](https://learn.microsoft.com/en-us/azure/developer/java/sdk/troubleshooting-dependency-version-conflict)
   for additional information on resolving dependency version conflicts.
+
+
+17. #### Calling 'stop' then 'start' APIs on a ServiceBusProcessor Client
+
+- **Anti-pattern**: Calling `stop()` followed by `start()` on a `ServiceBusProcessorClient` instance.
+- **Issue**: Calling `stop()` followed by `start()` on a `ServiceBusProcessorClient` involves significant complexity and
+  may
+  be deprecated in future versions of the SDK.
+- **Severity: WARNING**
+- **Recommendation**: Please close this processor instance and create a new one to restart processing. Refer to
+  the [GitHub issue](https://github.com/Azure/azure-sdk-for-java/issues/34464) for more details
