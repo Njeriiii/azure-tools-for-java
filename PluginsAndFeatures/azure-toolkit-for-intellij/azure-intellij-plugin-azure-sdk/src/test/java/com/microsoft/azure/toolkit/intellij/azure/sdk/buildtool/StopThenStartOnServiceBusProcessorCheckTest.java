@@ -1,11 +1,13 @@
 package com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool;
 
 import com.intellij.codeInspection.ProblemsHolder;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.psi.PsiAssignmentExpression;
 import com.intellij.psi.PsiCodeBlock;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiExpressionStatement;
 import com.intellij.psi.PsiFile;
@@ -282,6 +284,9 @@ public class StopThenStartOnServiceBusProcessorCheckTest {
         PsiExpressionStatement otherChild = mock(PsiExpressionStatement.class);
         PsiElement[] otherChildren = new PsiElement[]{otherChild};
 
+        Document document = mock(Document.class);
+        PsiDocumentManager psiDocumentManager = mock(PsiDocumentManager.class);
+
         // findAssociatedVariable method
         if (directVariableInitialization) {
             when(newExpression.getParent()).thenReturn(findAssociatedVariable);
@@ -329,11 +334,18 @@ public class StopThenStartOnServiceBusProcessorCheckTest {
         // isFileInCurrentProject method
         when(helperMethod.getContainingFile()).thenReturn(containingFile);
         when(containingFile.getProject()).thenReturn(project);
-        when(projectRootManager.getInstance(project)).thenReturn(projectRootManager);
+        when(ProjectRootManager.getInstance(project)).thenReturn(projectRootManager);
         when(projectRootManager.getFileIndex()).thenReturn(projectFileIndex);
         when(projectFileIndex.isInContent(containingFile.getVirtualFile())).thenReturn(true);
 
         when(helperMethod.getBody()).thenReturn(secondBody);
+
+        // Checking for duplicate registered problems
+        when(startQualifierExpression.getContainingFile()).thenReturn(containingFile);
+        when(PsiDocumentManager.getInstance(project)).thenReturn(psiDocumentManager);
+        when(psiDocumentManager.getDocument(containingFile)).thenReturn(document);
+        when(startMethodExpression.getTextOffset()).thenReturn(1);
+        when(document.getLineNumber(startMethodExpression.getTextOffset())).thenReturn(1);
 
         mockVisitor.visitElement(newExpression);
         mockVisitor.visitMethod(method);

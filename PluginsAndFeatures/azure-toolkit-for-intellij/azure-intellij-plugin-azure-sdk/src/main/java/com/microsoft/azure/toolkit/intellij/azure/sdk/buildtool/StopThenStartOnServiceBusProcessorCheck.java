@@ -2,11 +2,13 @@ package com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool;
 
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.psi.JavaElementVisitor;
 import com.intellij.psi.PsiAssignmentExpression;
 import com.intellij.psi.PsiCodeBlock;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiExpressionStatement;
@@ -58,7 +60,11 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
         private static final RuleConfig RULE_CONFIG;
         private static final boolean SKIP_WHOLE_RULE;
 
-        PsiVariable associatedVariable = null;
+        // Create a variable to store the associated variable -- the variable that the method is called on
+        private static PsiVariable associatedVariable = null;
+
+        // Create a map to store the problems and their line numbers -- to avoid duplicate problems
+        private static final Map<Integer, String> problemsMap = new HashMap<>();
 
         // Load the rule configuration
         static {
@@ -166,18 +172,35 @@ public class StopThenStartOnServiceBusProcessorCheck extends LocalInspectionTool
 
                     // Check if the resolved element is a variable
                     if ((resolvedElement instanceof PsiVariable)) {
-                        PsiVariable variable = (PsiVariable) resolvedElement;
 
                         if (variableStateMap.containsKey(resolvedElement.hashCode())) {
 
                             // Check the API calls on the variable we're tracking for a stop then start
                             if (checkMethodCall(methodCall)) {
-                                System.out.println("methodCall: " + methodCall);
-                                System.out.println("Registering Problem: " + methodCall.getText());
-                                holder.registerProblem(methodCall, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
-                                return;
-                            }
 
+                                // Get the containing file
+                                PsiFile psiFile = element.getContainingFile();
+
+                                // Get the project from the PsiFile
+                                Project project = psiFile.getProject();
+
+                                // Get the document corresponding to the PsiFile
+                                Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
+
+                                if (document != null) {
+                                    // Get the offset of the element
+                                    int offset = element.getTextOffset();
+
+                                    // Get the line number corresponding to the offset
+                                    int lineNumber = document.getLineNumber(offset);
+
+                                    if (!problemsMap.containsKey(lineNumber)) {
+                                        holder.registerProblem(methodCall, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
+                                        problemsMap.put(lineNumber, methodCall.getText());
+                                        return;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
