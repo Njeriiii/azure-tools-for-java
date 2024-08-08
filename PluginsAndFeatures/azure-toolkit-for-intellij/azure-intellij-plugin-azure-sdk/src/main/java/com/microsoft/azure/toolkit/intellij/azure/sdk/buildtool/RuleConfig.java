@@ -14,26 +14,28 @@ class RuleConfig {
     private final List<String> servicesToCheck;
     private final Map<String, String> antiPatternMessageMap;
     private final List<String> listedItemsToCheck;
+    private final Map<String, String> replacementMap;
 
     static final String AZURE_PACKAGE_NAME = "com.azure";
 
-    static final RuleConfig EMPTY_RULE = new RuleConfig(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyList());
+    static final RuleConfig EMPTY_RULE = new RuleConfig(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyList(), Collections.emptyMap());
 
     /**
      * Constructor for RuleConfig.
      *
-     * @param methodsToCheck            List of methods to check.
-     * @param clientsToCheck            List of clients to check.
-     * @param servicesToCheck           List of services to check.
-     * @param antiPatternMessageMap     Map of antipattern messages to display.
-     * @param listedItemsToCheck List of items to check for.
+     * @param methodsToCheck        List of methods to check.
+     * @param clientsToCheck        List of clients to check.
+     * @param servicesToCheck       List of services to check.
+     * @param antiPatternMessageMap Map of antipattern messages to display.
+     * @param listedItemsToCheck    List of items to check for.
      */
-    RuleConfig(List<String> methodsToCheck, List<String> clientsToCheck, List<String> servicesToCheck, Map<String, String> antiPatternMessageMap, List<String> listedItemsToCheck) {
+    RuleConfig(List<String> methodsToCheck, List<String> clientsToCheck, List<String> servicesToCheck, Map<String, String> antiPatternMessageMap, List<String> listedItemsToCheck, Map<String, String> replacementMap) {
         this.methodsToCheck = methodsToCheck;
         this.clientsToCheck = clientsToCheck;
         this.servicesToCheck = servicesToCheck;
         this.antiPatternMessageMap = antiPatternMessageMap;
         this.listedItemsToCheck = listedItemsToCheck;
+        this.replacementMap = replacementMap;
     }
 
     /**
@@ -94,5 +96,14 @@ class RuleConfig {
      */
     List<String> getListedItemsToCheck() {
         return listedItemsToCheck;
+    }
+
+    /**
+     * This method returns the replacementMap string for the rule
+     *
+     * @return replacementMap  The replacementMap string for the rule
+     */
+    Map<String, String> getReplacementMap() {
+        return replacementMap;
     }
 }

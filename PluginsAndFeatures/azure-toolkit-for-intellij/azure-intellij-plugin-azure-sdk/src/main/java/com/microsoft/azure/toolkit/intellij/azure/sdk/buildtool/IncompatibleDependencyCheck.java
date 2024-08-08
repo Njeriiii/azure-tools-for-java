@@ -5,6 +5,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.xml.XmlFile;
+import com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.replaceaction.ReplaceElementQuickFix;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -74,9 +75,11 @@ public class IncompatibleDependencyCheck extends AbstractLibraryVersionCheck {
             if (!encounteredVersionGroup.equals(versionGroup) && encounteredVersionGroup.startsWith(versionGroup.substring(0, versionGroup.lastIndexOf("_")))) {
                 String recommendedVersion = encounteredVersionGroup.substring(encounteredVersionGroup.lastIndexOf("_") + 1);
 
+                String replacementTagText = "<version>" + recommendedVersion + ".x</version>";
+
                 // Flag the version if the minor version is different from the recommended version
                 String message = getFormattedMessage(fullName, recommendedVersion, IncompatibleDependencyVisitor.RULE_CONFIG);
-                holder.registerProblem(versionElement, message);
+                holder.registerProblem(versionElement, message, new ReplaceElementQuickFix(versionElement, replacementTagText));
                 return;
             }
         }

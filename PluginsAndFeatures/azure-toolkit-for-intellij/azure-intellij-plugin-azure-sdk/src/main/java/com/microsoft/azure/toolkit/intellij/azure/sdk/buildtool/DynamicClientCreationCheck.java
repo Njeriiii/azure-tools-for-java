@@ -17,8 +17,6 @@ import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiStatement;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 /**
  * This class is used to check for the dynamic creation of clients in the code.
  * It extends the LocalInspectionTool class, which is used to create custom code inspections.

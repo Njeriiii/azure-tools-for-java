@@ -132,6 +132,7 @@ class RuleConfigLoader {
         List<String> servicesToCheck = new ArrayList<>();
         Map<String, String> antiPatternMessageMap = new HashMap<>();
         List<String> listedItemsToCheck = new ArrayList<>();
+        Map<String, String> replacementMap = new HashMap<>();
 
         // Check if the JSON file starts with an object
         if (reader.nextToken() != JsonToken.START_OBJECT) {
@@ -149,7 +150,7 @@ class RuleConfigLoader {
                     methodsToCheck = getListFromJsonArray(reader);
                     break;
                 case "antiPatternMessage":
-                    antiPatternMessageMap = getMapFromJsonObject(reader, antiPatternMessageMap);
+                    antiPatternMessageMap = getMapFromJsonObject(reader, antiPatternMessageMap, replacementMap);
                     break;
                 case "clientsToCheck":
                     clientsToCheck = getListFromJsonArray(reader);
@@ -166,18 +167,21 @@ class RuleConfigLoader {
                 case "url":
                     listedItemsToCheck = getListFromJsonArray(reader);
                     break;
+                case "replacement":
+                    replacementMap = getMapFromJsonObject(reader, antiPatternMessageMap, replacementMap);
+                    break;
                 default:
                     if (fieldName.endsWith("Check")) {
                         // Move to the next token to process the nested object
                         reader.nextToken();
-                        antiPatternMessageMap = getMapFromJsonObject(reader, antiPatternMessageMap);
+                        antiPatternMessageMap = getMapFromJsonObject(reader, antiPatternMessageMap, replacementMap);
                     } else {
                         reader.skipChildren();
                     }
                     break;
             }
         }
-        return new RuleConfig(methodsToCheck, clientsToCheck, servicesToCheck, antiPatternMessageMap, listedItemsToCheck);
+        return new RuleConfig(methodsToCheck, clientsToCheck, servicesToCheck, antiPatternMessageMap, listedItemsToCheck, replacementMap);
     }
 
     /**
@@ -219,10 +223,11 @@ class RuleConfigLoader {
      * @return Map of strings parsed from the JSON object
      * @throws IOException - if there is an error reading the file
      */
-    private Map<String, String> getMapFromJsonObject(JsonReader reader, Map<String, String> antiPatternMessageMap) throws IOException {
+    private Map<String, String> getMapFromJsonObject(JsonReader reader, Map<String, String> antiPatternMessageMap, Map<String, String> replacementMap) throws IOException {
 
         String identifiersToCheck = null;
         String antiPatternMessage = null;
+        String replacement = null;
 
         // Read the JSON file and parse the RuleConfig object
         while (reader.nextToken() != JsonToken.END_OBJECT) {
@@ -236,6 +241,9 @@ class RuleConfigLoader {
                     break;
                 case "antiPatternMessage":
                     antiPatternMessage = reader.getString();
+                    break;
+                case "replacement":
+                    replacement = reader.getString();
                     break;
                 default:
                     reader.skipChildren();
@@ -253,9 +261,29 @@ class RuleConfigLoader {
                     return antiPatternMessageMap;
                 }
             }
+
+            // Add to map based on conditions
+            if (replacement != null) {
+
+                // This map is for base classes that have a set of discouraged identifiers and a corresponding set of recommendations
+                if (identifiersToCheck != null) {
+                    replacementMap.put(identifiersToCheck, replacement);
+                } else {
+                    // This map is for single recommendations of a particular rule
+                    replacementMap.put(fieldName, replacement);
+                    return replacementMap;
+                }
+            }
         }
-        // This map is to return mapped anti-pattern messages that have a set of discouraged identifiers and a corresponding set of antipattern messages
-        return antiPatternMessageMap;
+
+        // This section is to return mapped anti-pattern messages or replacement messages
+        if (antiPatternMessage != null) {
+            return antiPatternMessageMap;
+        }
+        if (replacement != null) {
+            return replacementMap;
+        }
+        return new HashMap<>();
     }
 
     /**

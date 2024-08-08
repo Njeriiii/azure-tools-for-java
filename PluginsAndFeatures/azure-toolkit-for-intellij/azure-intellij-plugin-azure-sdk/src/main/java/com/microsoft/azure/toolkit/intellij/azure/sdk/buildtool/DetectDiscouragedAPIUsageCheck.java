@@ -10,6 +10,7 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiReferenceExpression;
 
+import com.microsoft.azure.toolkit.intellij.azure.sdk.buildtool.replaceaction.ReplaceElementQuickFix;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -112,7 +113,7 @@ public class DetectDiscouragedAPIUsageCheck extends LocalInspectionTool {
                             return;
                         }
                         // give the suggestion of the discouraged method
-                        holder.registerProblem(problemElement, RULE_CONFIG.getAntiPatternMessageMap().get(method.getName()));
+                        holder.registerProblem(problemElement, RULE_CONFIG.getAntiPatternMessageMap().get(method.getName()), new ReplaceElementQuickFix(problemElement, RULE_CONFIG.getReplacementMap().get(method.getName())));
                     }
                 }
             }
