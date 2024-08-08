@@ -35,7 +35,7 @@ public class DynamicClientCreationCheck extends LocalInspectionTool {
     @NotNull
     @Override
     public JavaElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
-        return new DynamicClientCreationVisitor(holder, isOnTheFly);
+        return new DynamicClientCreationVisitor(holder);
     }
 
 
@@ -62,13 +62,10 @@ public class DynamicClientCreationCheck extends LocalInspectionTool {
         /**
          * This constructor initializes the ProblemsHolder object.
          * It is used to register problems found in the code.
-         * <p>
-         * isOnTheFly is a boolean that indicates if the inspection is run on the fly.
-         * It is not in use in this implementation, but present by default in the method signature.
          *
-         * @param holder
+         * @param holder The holder for the problems found
          */
-        public DynamicClientCreationVisitor(ProblemsHolder holder, boolean isOnTheFly) {
+        public DynamicClientCreationVisitor(ProblemsHolder holder) {
             this.holder = holder;
         }
 
@@ -126,7 +123,7 @@ public class DynamicClientCreationCheck extends LocalInspectionTool {
                 PsiExpression rhs = assignment.getRExpression();
 
                 // Check if the right-hand side is a method call expression
-                if (rhs != null && isClientCreationMethod((PsiMethodCallExpression) rhs)) {
+                if (rhs instanceof PsiMethodCallExpression && isClientCreationMethod((PsiMethodCallExpression) rhs)) {
                     holder.registerProblem(rhs, RULE_CONFIG.getAntiPatternMessageMap().get("antiPatternMessage"));
                 }
             } else if (blockChild instanceof PsiDeclarationStatement) {    // This is a check for the declaration statement
