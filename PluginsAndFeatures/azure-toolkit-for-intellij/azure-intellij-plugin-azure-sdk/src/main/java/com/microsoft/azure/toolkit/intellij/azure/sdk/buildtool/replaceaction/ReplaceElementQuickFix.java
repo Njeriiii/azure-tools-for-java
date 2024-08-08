@@ -7,7 +7,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementFactory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
-import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.xml.XmlTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,11 +38,8 @@ public class ReplaceElementQuickFix implements LocalQuickFix {
     @Override
     public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
         PsiElement element = descriptor.getPsiElement();
-        System.out.println("Element: " + element);
-        System.out.println("discouragedElement: " + discouragedElement);
         if (element != null && element.isValid()) {
             PsiElement suggestedElement = createElementFromText(project, suggestedElementText, element);
-            System.out.println("Suggested Element: " + suggestedElement);
             if (suggestedElement != null && suggestedElement.isValid()) {
                 discouragedElement.replace(suggestedElement);
             }
